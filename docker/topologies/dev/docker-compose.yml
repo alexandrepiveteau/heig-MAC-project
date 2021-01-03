@@ -3,3 +3,6 @@ services:
 
   bot:
     build: ../../../
+    environment:
+      - BOT_DEBUG=${TELEGRAM_BOT_DEBUG}
+      - BOT_TOKEN=${TELEGRAM_BOT_TOKEN}
