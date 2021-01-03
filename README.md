@@ -4,7 +4,7 @@
 ![.github/workflows/format.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/format.yml/badge.svg)
 ![.github/workflows/tests.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/tests.yml/badge.svg)
 
-An Telegram bot for everything related to climbing. This is a semester project done at HEIG-VD.
+A Telegram bot for everything related to climbing. This is a semester project done at HEIG-VD.
 
 ## Team
 
