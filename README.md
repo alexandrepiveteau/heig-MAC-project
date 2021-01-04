@@ -6,6 +6,8 @@
 
 A Telegram bot for everything related to climbing. This is a semester project done at HEIG-VD.
 
+:pushpin: Model [on Miro](https://miro.com/app/board/o9J_lZlt3Rw=/) :pushpin:
+
 ## Team
 
 | Name                                   |                                  |
