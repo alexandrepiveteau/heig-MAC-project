@@ -2,8 +2,10 @@ package main
 
 import (
 	"context"
+	"fmt"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
@@ -63,7 +65,16 @@ func main() {
 
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, update.Message.Text)
+		database := client.Database("db")
+		messages := database.Collection("messages")
+		messages.InsertOne(ctx, bson.D{
+			{Key: "body", Value: update.Message.Text},
+		})
+		count, _ := messages.CountDocuments(ctx, bson.D{})
+
+		reply := fmt.Sprintf("%d %s", count, update.Message.Text)
+
+		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 		msg.ReplyToMessageID = update.Message.MessageID
 
 		// Create a placeholder session, to test Neo4j connectivity.
