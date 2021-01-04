@@ -1,31 +1,52 @@
 package main
 
 import (
+	"context"
 	"github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+	"time"
 )
 
 const envDebug = "BOT_DEBUG"
 const envToken = "BOT_TOKEN"
 const envNeo4j = "BOT_NEO4J"
+const envMongo = "BOT_MONGO"
 
 func main() {
 	debug := os.Getenv(envDebug)
 	token := os.Getenv(envToken)
 	neo4jHost := os.Getenv(envNeo4j)
+	mongoHost := os.Getenv(envMongo)
 
 	bot, err := tgbotapi.NewBotAPI(token)
 	if err != nil {
 		log.Panic(err)
 	}
 
+	// Neo4J
 	driver, err := neo4j.NewDriver(neo4jHost, neo4j.NoAuth())
 	if err != nil {
 		log.Panic(err)
 	}
 	defer driver.Close()
+
+	// Mongo
+	client, err := mongo.NewClient(options.Client().ApplyURI(mongoHost))
+	if err != nil {
+		log.Panic(err)
+	}
+
+	// TODO : Properly handle context cancellation.
+	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	err = client.Connect(ctx)
+	if err != nil {
+		log.Panic(err)
+	}
+	defer client.Disconnect(ctx)
 
 	bot.Debug = debug == "true"
 	log.Printf("Authorized on account %s", bot.Self.UserName)
