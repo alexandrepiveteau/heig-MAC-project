@@ -10,7 +10,6 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
-	"time"
 )
 
 const envDebug = "BOT_DEBUG"
@@ -43,7 +42,7 @@ func main() {
 	}
 
 	// TODO : Properly handle context cancellation.
-	ctx, _ := context.WithTimeout(context.Background(), 10*time.Second)
+	ctx := context.TODO()
 	err = client.Connect(ctx)
 	if err != nil {
 		log.Panic(err)
@@ -70,9 +69,13 @@ func main() {
 		messages.InsertOne(ctx, bson.D{
 			{Key: "body", Value: update.Message.Text},
 		})
-		count, _ := messages.CountDocuments(ctx, bson.D{})
+		count, err := messages.CountDocuments(ctx, bson.D{})
 
 		reply := fmt.Sprintf("%d %s", count, update.Message.Text)
+
+		if err != nil {
+			reply = err.Error()
+		}
 
 		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
 		msg.ReplyToMessageID = update.Message.MessageID
