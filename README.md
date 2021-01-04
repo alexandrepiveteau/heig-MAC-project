@@ -1,32 +1,39 @@
-# Projet MAC
+# heig-MAC/project
 
-Notre groupe est composé de:
 
-* Matthieu Burguburu
-* Alexandre Piveteau
-* Guy-Laurent Subri
+![.github/workflows/format.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/format.yml/badge.svg)
+![.github/workflows/tests.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/tests.yml/badge.svg)
 
-# Descriptif
-Nous souhaitons développer un bot telegram d'escalade en salle permettant de tracker les différentes voies que l'utilisateur à réussies ou essayées, ainsi que différentes informations les concernant.\
-Ces différentes données et possibilités pourront être, entre autres:
-- Concernant les voies:
-    - Informations générales:
-        - Le lieu
-        - Le nom de la voie
-        - Le niveau de difficulté (plusieurs échelles)
-        - La couleur des prises
-        - La date de création
-        - La date de démantèlement (si applicable)
-        - Différentes photos de la voie
-        - Une liste des utilisateurs l'ayant réussie
-        - Vidéos des utilisateurs l'ayant réussie
-        - Des commentaires des utilisateurs
-    - Informations spécifiques à un utilisateur:
-        - Le status de réussite de la voie: Flash, Réussie, Pas réussie, Projet
-        - Une note
-        - Une estimation du niveau de la voie
-        - Une date de réussite
-- Autres possibilités:
-    - Suivre un utilisateur pour recevoir des notifications / accès rapide concernant ses nouvelles réussites / projets
-    - Défier un utilisateur pour réussir différentes voies -> vidéos de la réussite
-    - Idem, mais défi de groupe / compétition
+A Telegram bot for everything related to climbing. This is a semester project done at HEIG-VD.
+
+## Team
+
+| Name                                   |                                  |
+|----------------------------------------|----------------------------------|
+| Matthieu Burguburu                     | matthieu.burguburu@heig-vd.ch    |
+| Alexandre Piveteau                     | alexandre.piveteau@heig-vd.ch    |
+| Guy-Laurent Subri                      | guy-laurent.subri@heig-vd.ch     |
+
+## Setting the project up
+
+To run the project locally, you'll need:
+
+- [Docker compose](https://docs.docker.com/compose/); and
+- a Telegram [bot API token](https://core.telegram.org/bots/api).
+
+You'll have to create a file named `.env` in `./docker/topologies/dev` :
+
+```sh
+> cat ./docker/topologies/dev/.env
+
+TELEGRAM_BOT_DEBUG=false
+TELEGRAM_BOT_TOKEN=123_YOUR_TELEGRAM_API_TOKEN
+```
+
+Running the bot then done as follows:
+
+```sh
+> ./run-compose.sh
+```
+
+The bot will remain active until it receives a SIGTERM.
