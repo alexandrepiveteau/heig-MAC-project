@@ -86,16 +86,26 @@ func handleUser(
 	updates <-chan tgbotapi.Update,
 	bot *tgbotapi.BotAPI,
 ) {
+	var forwarder chan tgbotapi.Update = nil
+
 	for update := range updates {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 		if update.Message.IsCommand() {
 			switch update.Message.Command() {
+			case "color":
+				// TODO: do something
+				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
 				msg.ReplyToMessageID = update.Message.MessageID
+
 				bot.Send(msg)
+
+				forwarder = nil
 			}
+		} else if forwarder != nil { // We had previous command, so forward in chan
+			forwarder <- update
 		}
 	}
 }
