@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"climb/pkg/comm"
 	"climb/pkg/commands"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -9,7 +10,7 @@ import (
 type Controller interface {
 	GetSendChannel() chan<- tgbotapi.Chattable
 
-	InstantiateColorCmd() chan tgbotapi.Update
+	InstantiateColorCmd() comm.Comm
 }
 
 type controller struct {
@@ -31,12 +32,15 @@ func GetController(
 	return &controller
 }
 
-func (c *controller) InstantiateColorCmd() chan tgbotapi.Update {
-	updates := make(chan tgbotapi.Update)
+func (c *controller) InstantiateColorCmd() comm.Comm {
+	comm := comm.Comm{
+		Updates: make(chan tgbotapi.Update),
+		Quit:    make(chan interface{}),
+	}
 
-	go commands.Color(updates, c.sendChan)
+	go commands.Color(comm, c.sendChan)
 
-	return updates
+	return comm
 }
 
 func (c *controller) GetSendChannel() chan<- tgbotapi.Chattable {

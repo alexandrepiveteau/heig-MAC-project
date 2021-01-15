@@ -1,6 +1,7 @@
 package main
 
 import (
+	"climb/pkg/comm"
 	"climb/pkg/controller"
 	"context"
 	"log"
@@ -89,29 +90,36 @@ func main() {
 }
 
 func handleUser(
-	controller controller.Controller,
+	ctrl controller.Controller,
 	updates <-chan tgbotapi.Update,
 ) {
-	var forwarder chan tgbotapi.Update = nil
-	send := controller.GetSendChannel()
+	var forwarder *comm.Comm
+	send := ctrl.GetSendChannel()
 
 	for update := range updates {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 		if update.Message.IsCommand() {
+			// Clean up previous commands
+			if forwarder != nil {
+				forwarder.Quit <- struct{}{}
+				forwarder = nil
+			}
+
+			// Get new command starsted
 			switch update.Message.Command() {
 			case "color":
-				// TODO: do something
+				comm := ctrl.InstantiateColorCmd()
+				forwarder = &comm
 				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
 				msg.ReplyToMessageID = update.Message.MessageID
 
 				send <- msg
-				forwarder = nil
 			}
-		} else if forwarder != nil { // We had previous command, so forward in chan
-			forwarder <- update
+		} else if forwarder != nil {
+			forwarder.Updates <- update
 		}
 	}
 }
