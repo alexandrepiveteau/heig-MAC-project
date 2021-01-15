@@ -101,28 +101,28 @@ func handleUser(
 
 	for update := range updates {
 
-		if update.Message != nil {
+		if update.Message != nil && update.Message.IsCommand() {
+			// log the message
 			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
-			if update.Message.IsCommand() {
-				// Clean up previous commands
-				if forwarder != nil {
-					forwarder.Quit <- struct{}{}
-					forwarder = nil
-				}
 
-				// Get new command starsted
-				switch update.Message.Command() {
-				case "color":
-					comm := ctrl.InstantiateColorCmd()
-					forwarder = &comm
-					forwarder.Updates <- update
-					break
-				default:
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
-					msg.ReplyToMessageID = update.Message.MessageID
+			// Clean up previous commands
+			if forwarder != nil {
+				forwarder.QuitCommand <- struct{}{}
+				forwarder = nil
+			}
 
-					send <- msg
-				}
+			// Get new command started
+			switch update.Message.Command() {
+			case "color":
+				comm := ctrl.InstantiateColorCmd()
+				forwarder = &comm
+				forwarder.Updates <- update
+				break
+			default:
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
+				msg.ReplyToMessageID = update.Message.MessageID
+
+				send <- msg
 			}
 		} else if forwarder != nil {
 			forwarder.Updates <- update

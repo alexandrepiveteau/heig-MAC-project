@@ -36,7 +36,8 @@ type state struct {
 	bot *tgbotapi.BotAPI
 
 	// Stage of the progress in the command
-	stage          Stage
+	stage Stage
+
 	favouriteColor *string
 	leastFavColor  *string
 }
@@ -93,6 +94,7 @@ func Color(
 	comm comm.Comm,
 	bot *tgbotapi.BotAPI,
 ) {
+
 	state := state{
 		bot:            bot,
 		stage:          Init,
@@ -102,7 +104,7 @@ func Color(
 
 	for {
 		select {
-		case <-comm.Quit:
+		case <-comm.QuitCommand:
 			// For now, simply quit. Later, we'll want to add all the information in the db
 			return
 
@@ -118,6 +120,7 @@ func Color(
 				state.leastFav(update)
 				break
 			case End:
+				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
 
