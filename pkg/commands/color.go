@@ -19,13 +19,38 @@ var colorKBD = tgbotapi.NewInlineKeyboardMarkup(
 	),
 )
 
+// State definition
+// Makeshift enum: https://golang.org/ref/spec#Iota
+
+type Stage int
+
+const (
+	Init Stage = iota
+)
+
+type state struct {
+	// Channel where to send messages
+	send chan<- tgbotapi.Chattable
+
+	// Stage of the progress in the command
+	stage Stage
+}
+
+func (s *state) init(update tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Colors everywhere")
+	msg.ReplyToMessageID = update.Message.MessageID
+
+	s.send <- msg
+}
+
+// Entrypoint of bot command
 func Color(
 	comm comm.Comm,
 	send chan<- tgbotapi.Chattable,
 ) {
 	state := state{
 		send:  send,
-		stage: "init",
+		stage: Init,
 	}
 
 	for {
@@ -36,7 +61,7 @@ func Color(
 
 		case update := <-comm.Updates:
 			switch state.stage {
-			case "init":
+			case Init:
 				state.init(update)
 				break
 			default:
@@ -48,19 +73,4 @@ func Color(
 			}
 		}
 	}
-}
-
-type state struct {
-	// Channel where to send messages
-	send chan<- tgbotapi.Chattable
-
-	// Stage of the progress in the command
-	stage string
-}
-
-func (s *state) init(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Colors everywhere")
-	msg.ReplyToMessageID = update.Message.MessageID
-
-	s.send <- msg
 }
