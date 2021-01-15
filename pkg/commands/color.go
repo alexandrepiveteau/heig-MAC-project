@@ -2,6 +2,7 @@ package commands
 
 import (
 	"climb/pkg/comm"
+	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -28,6 +29,7 @@ const (
 	Init Stage = iota
 	FavouriteColor
 	LeastFavouriteColor
+	End
 )
 
 type state struct {
@@ -36,6 +38,7 @@ type state struct {
 	// Stage of the progress in the command
 	stage          Stage
 	favouriteColor *string
+	leastFavColor  *string
 }
 
 func (s *state) init(update tgbotapi.Update) {
@@ -54,7 +57,7 @@ func (s *state) favourite(update tgbotapi.Update) {
 	// Prepare next message
 	chatId := update.CallbackQuery.Message.Chat.ID
 	msgID := update.CallbackQuery.Message.MessageID
-	text := "Ok but what is your least favourite color?"
+	text := "Ok, but what is your least favourite color?"
 
 	msg := tgbotapi.NewEditMessageText(chatId, msgID, text)
 	msg.ReplyMarkup = &colorKBD
@@ -62,6 +65,27 @@ func (s *state) favourite(update tgbotapi.Update) {
 	s.bot.Send(msg)
 
 	s.stage = LeastFavouriteColor
+}
+
+func (s *state) leastFav(update tgbotapi.Update) {
+	// Update state with new information
+	data := update.CallbackQuery.Data
+	s.leastFavColor = &data
+
+	// Prepare next message
+	chatId := update.CallbackQuery.Message.Chat.ID
+	msgID := update.CallbackQuery.Message.MessageID
+	text := fmt.Sprintf(
+		"I got it! Your favourite color is %s and your least favourite one is %s!",
+		*s.favouriteColor,
+		*s.leastFavColor,
+	)
+
+	msg := tgbotapi.NewEditMessageText(chatId, msgID, text)
+
+	s.bot.Send(msg)
+
+	s.stage = End
 }
 
 // Entrypoint of bot command
@@ -73,6 +97,7 @@ func Color(
 		bot:            bot,
 		stage:          Init,
 		favouriteColor: nil,
+		leastFavColor:  nil,
 	}
 
 	for {
@@ -89,9 +114,12 @@ func Color(
 			case FavouriteColor:
 				state.favourite(update)
 				break
+			case LeastFavouriteColor:
+				state.leastFav(update)
+				break
+			case End:
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
-				msg.ReplyToMessageID = update.Message.MessageID
 
 				bot.Send(msg)
 				break
