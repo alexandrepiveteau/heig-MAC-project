@@ -51,6 +51,11 @@ func main() {
 	bot.Debug = debug == "true"
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
+	// Start controller
+	controller := GetController(
+		bot,
+	)
+
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
@@ -73,8 +78,8 @@ func main() {
 			channel = newChannel
 
 			go handleUser(
+				controller,
 				channel,
-				bot,
 			)
 		}
 
@@ -83,10 +88,11 @@ func main() {
 }
 
 func handleUser(
+	controller Controller,
 	updates <-chan tgbotapi.Update,
-	bot *tgbotapi.BotAPI,
 ) {
 	var forwarder chan tgbotapi.Update = nil
+	send := controller.GetSendChannel()
 
 	for update := range updates {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
@@ -100,8 +106,7 @@ func handleUser(
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
 				msg.ReplyToMessageID = update.Message.MessageID
 
-				bot.Send(msg)
-
+				send <- msg
 				forwarder = nil
 			}
 		} else if forwarder != nil { // We had previous command, so forward in chan

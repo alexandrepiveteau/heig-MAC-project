@@ -7,6 +7,8 @@ import (
 )
 
 type Controller interface {
+	GetSendChannel() chan<- tgbotapi.Chattable
+
 	InstantiateColorCmd() chan tgbotapi.Update
 }
 
@@ -18,11 +20,10 @@ type controller struct {
 func GetController(
 	bot *tgbotapi.BotAPI,
 ) Controller {
-	sendChan := make(chan tgbotapi.Chattable)
 
 	controller := controller{
 		bot:      bot,
-		sendChan: sendChan,
+		sendChan: make(chan tgbotapi.Chattable),
 	}
 
 	go controller.startSender()
@@ -36,6 +37,10 @@ func (c *controller) InstantiateColorCmd() chan tgbotapi.Update {
 	go commands.Color(updates, c.sendChan)
 
 	return updates
+}
+
+func (c *controller) GetSendChannel() chan<- tgbotapi.Chattable {
+	return c.sendChan
 }
 
 func (c *controller) startSender() {
