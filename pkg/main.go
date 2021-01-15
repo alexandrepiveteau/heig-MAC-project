@@ -1,6 +1,7 @@
 package main
 
 import (
+	"climb/pkg/controller"
 	"context"
 	"log"
 	"os"
@@ -52,7 +53,7 @@ func main() {
 	log.Printf("Authorized on account %s", bot.Self.UserName)
 
 	// Start controller
-	controller := GetController(
+	controller := controller.GetController(
 		bot,
 	)
 
@@ -88,7 +89,7 @@ func main() {
 }
 
 func handleUser(
-	controller Controller,
+	controller controller.Controller,
 	updates <-chan tgbotapi.Update,
 ) {
 	var forwarder chan tgbotapi.Update = nil
