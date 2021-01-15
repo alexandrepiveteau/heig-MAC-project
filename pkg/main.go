@@ -58,11 +58,43 @@ func main() {
 
 	updates, err := bot.GetUpdatesChan(u)
 
+	// Prepare a map of user -> chan update
+	userForwarder := make(map[int]chan tgbotapi.Update)
+
 	for update := range updates {
 		if update.Message == nil { // ignore any non-Message Updates
 			continue
 		}
 
+		userId := update.Message.From.ID
+		channel, prs := userForwarder[userId]
+
+		if !prs {
+			newChannel := make(chan tgbotapi.Update)
+			userForwarder[userId] = newChannel
+			channel = newChannel
+
+			go handleUser(
+				channel,
+				bot,
+				client,
+				ctx,
+				driver,
+			)
+		}
+
+		channel <- update
+	}
+}
+
+func handleUser(
+	updates <-chan tgbotapi.Update,
+	bot *tgbotapi.BotAPI,
+	client *mongo.Client,
+	ctx context.Context,
+	driver neo4j.Driver,
+) {
+	for update := range updates {
 		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 		database := client.Database("db")
