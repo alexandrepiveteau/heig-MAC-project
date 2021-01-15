@@ -2,6 +2,8 @@ package commands
 
 import (
 	"climb/pkg/comm"
+	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -26,30 +28,51 @@ type Stage int
 
 const (
 	Init Stage = iota
+	FavouriteColor
+	LeastFavouriteColor
 )
 
 type state struct {
-	// Channel where to send messages
-	send chan<- tgbotapi.Chattable
+	bot *tgbotapi.BotAPI
 
 	// Stage of the progress in the command
 	stage Stage
 }
 
 func (s *state) init(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Colors everywhere")
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is your favourite color?")
 	msg.ReplyToMessageID = update.Message.MessageID
+	msg.ReplyMarkup = colorKBD
 
-	s.send <- msg
+	s.bot.Send(msg)
+	s.stage = FavouriteColor
+}
+
+func (s *state) favourite(update tgbotapi.Update) {
+	log.Print(update.CallbackQuery.Data)
+
+	chatId := update.CallbackQuery.Message.ChatID
+	msgID := update.CallbackQuery.Message.MessageID
+	text := fmt.Sprintf("Sweet, your favourite color is %s\n", s.favourite)
+
+	//msg := tgbotapi.NewEditMessageText(chatId, msgID, text)
+	/*
+	 *  msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is your favourite color?")
+	 *  msg.ReplyToMessageID = update.Message.MessageID
+	 *  msg.ReplyMarkup = colorKBD
+	 *
+	 *  s.bot.Send(msg)
+	 *  s.stage = FavouriteColor
+	 */
 }
 
 // Entrypoint of bot command
 func Color(
 	comm comm.Comm,
-	send chan<- tgbotapi.Chattable,
+	bot *tgbotapi.BotAPI,
 ) {
 	state := state{
-		send:  send,
+		bot:   bot,
 		stage: Init,
 	}
 
@@ -64,11 +87,14 @@ func Color(
 			case Init:
 				state.init(update)
 				break
+			case FavouriteColor:
+				state.favourite(update)
+				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
 				msg.ReplyToMessageID = update.Message.MessageID
 
-				send <- msg
+				bot.Send(msg)
 				break
 			}
 		}

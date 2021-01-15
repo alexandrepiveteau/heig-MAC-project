@@ -67,11 +67,14 @@ func main() {
 	userForwarder := make(map[int]chan tgbotapi.Update)
 
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
+
+		var userId int
+		if update.Message != nil {
+			userId = update.Message.From.ID
+		} else if update.CallbackQuery != nil {
+			userId = update.CallbackQuery.From.ID
 		}
 
-		userId := update.Message.From.ID
 		channel, prs := userForwarder[userId]
 
 		if !prs {
@@ -97,27 +100,29 @@ func handleUser(
 	send := ctrl.GetSendChannel()
 
 	for update := range updates {
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
-		if update.Message.IsCommand() {
-			// Clean up previous commands
-			if forwarder != nil {
-				forwarder.Quit <- struct{}{}
-				forwarder = nil
-			}
+		if update.Message != nil {
+			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+			if update.Message.IsCommand() {
+				// Clean up previous commands
+				if forwarder != nil {
+					forwarder.Quit <- struct{}{}
+					forwarder = nil
+				}
 
-			// Get new command starsted
-			switch update.Message.Command() {
-			case "color":
-				comm := ctrl.InstantiateColorCmd()
-				forwarder = &comm
-				forwarder.Updates <- update
-				break
-			default:
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
-				msg.ReplyToMessageID = update.Message.MessageID
+				// Get new command starsted
+				switch update.Message.Command() {
+				case "color":
+					comm := ctrl.InstantiateColorCmd()
+					forwarder = &comm
+					forwarder.Updates <- update
+					break
+				default:
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
+					msg.ReplyToMessageID = update.Message.MessageID
 
-				send <- msg
+					send <- msg
+				}
 			}
 		} else if forwarder != nil {
 			forwarder.Updates <- update
