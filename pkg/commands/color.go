@@ -23,6 +23,11 @@ func Color(
 	comm comm.Comm,
 	send chan<- tgbotapi.Chattable,
 ) {
+	state := state{
+		send:  send,
+		stage: "init",
+	}
+
 	for {
 		select {
 		case <-comm.Quit:
@@ -30,10 +35,32 @@ func Color(
 			return
 
 		case update := <-comm.Updates:
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "colors everywhere")
-			msg.ReplyToMessageID = update.Message.MessageID
+			switch state.stage {
+			case "init":
+				state.init(update)
+				break
+			default:
+				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
+				msg.ReplyToMessageID = update.Message.MessageID
 
-			send <- msg
+				send <- msg
+				break
+			}
 		}
 	}
+}
+
+type state struct {
+	// Channel where to send messages
+	send chan<- tgbotapi.Chattable
+
+	// Stage of the progress in the command
+	stage string
+}
+
+func (s *state) init(update tgbotapi.Update) {
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Colors everywhere")
+	msg.ReplyToMessageID = update.Message.MessageID
+
+	s.send <- msg
 }

@@ -111,6 +111,7 @@ func handleUser(
 			case "color":
 				comm := ctrl.InstantiateColorCmd()
 				forwarder = &comm
+				forwarder.Updates <- update
 				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
