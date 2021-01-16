@@ -132,16 +132,27 @@ func handleUser(
 
 // logReception logs a message based on it's type. The update argument is the message to log.
 func logReception(update tgbotapi.Update) {
-	var username string
-	var text string
+	user := GetUser(&update)
 
+	var text string
 	if update.Message != nil {
-		username = update.Message.From.UserName
 		text = update.Message.Text
 	} else if update.CallbackQuery != nil {
-		username = update.CallbackQuery.From.UserName
 		text = update.CallbackQuery.Data
 	}
 
-	log.Printf("[%s] %s", username, text)
+	log.Printf("[%s] %s", user.String(), text)
+}
+
+// GetUser Returns the user who sent an update
+func GetUser(update *tgbotapi.Update) *tgbotapi.User {
+	var user *tgbotapi.User
+
+	if update.Message != nil {
+		user = update.Message.From
+	} else if update.CallbackQuery != nil {
+		user = update.CallbackQuery.From
+	}
+
+	return user
 }
