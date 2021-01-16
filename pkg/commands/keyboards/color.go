@@ -2,6 +2,7 @@ package keyboards
 
 import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 
+// The Color keyboard shows the range of color that we support in the app
 var Color = tgbotapi.NewInlineKeyboardMarkup(
 	tgbotapi.NewInlineKeyboardRow(
 		tgbotapi.NewInlineKeyboardButtonData("Red", "red"),
