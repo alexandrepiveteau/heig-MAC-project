@@ -50,11 +50,18 @@ func GetController(
 		Instantiation: controller.instantiateColorCmd,
 	}
 
+	addRouteCmd := types.CommandDefinition{
+		Command:       "addRoute",
+		Description:   "The addRoute will allow you to create a new route",
+		Instantiation: controller.instantiateAddRouteCmd,
+	}
+
 	// Update allowed commands in controller
 	controller.availableCommands = append(
 		controller.availableCommands,
 		startCmd,
 		colorCmd,
+		addRouteCmd,
 	)
 
 	return &controller
@@ -72,6 +79,14 @@ func (c *controller) Bot() *tgbotapi.BotAPI {
 
 // Private functions
 
+func (c *controller) instantiateStartCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.InitComm()
+
+	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
+
+	return comm
+}
+
 func (c *controller) instantiateColorCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
@@ -80,10 +95,10 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 	return comm
 }
 
-func (c *controller) instantiateStartCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
-	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
+	go commands.AddRouteCmd(comm, commandTermination, c.bot)
 
 	return comm
 }
