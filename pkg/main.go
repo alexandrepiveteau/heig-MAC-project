@@ -1,15 +1,17 @@
 package main
 
 import (
+	"climb/pkg/controller"
+	"climb/pkg/types"
+	"climb/pkg/utils"
 	"context"
-	"fmt"
-	"github.com/go-telegram-bot-api/telegram-bot-api"
-	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
-	"go.mongodb.org/mongo-driver/bson"
-	"go.mongodb.org/mongo-driver/mongo"
-	"go.mongodb.org/mongo-driver/mongo/options"
 	"log"
 	"os"
+
+	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 const envDebug = "BOT_DEBUG"
@@ -29,61 +31,106 @@ func main() {
 	}
 
 	// Neo4J
-	driver, err := neo4j.NewDriver(neo4jHost, neo4j.NoAuth())
+	neo4jDriver, err := neo4j.NewDriver(neo4jHost, neo4j.NoAuth())
 	if err != nil {
 		log.Panic(err)
 	}
-	defer driver.Close()
+	defer neo4jDriver.Close()
 
 	// Mongo
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoHost))
+	mongoClient, err := mongo.NewClient(options.Client().ApplyURI(mongoHost))
 	if err != nil {
 		log.Panic(err)
 	}
 
 	// TODO : Properly handle context cancellation.
 	ctx := context.TODO()
-	err = client.Connect(ctx)
+	err = mongoClient.Connect(ctx)
 	if err != nil {
 		log.Panic(err)
 	}
-	defer client.Disconnect(ctx)
+	defer mongoClient.Disconnect(ctx)
 
 	bot.Debug = debug == "true"
 	log.Printf("Authorized on account %s", bot.Self.UserName)
+
+	// Start controller
+	controller := controller.GetController(
+		bot,
+		&neo4jDriver,
+		mongoClient,
+	)
 
 	u := tgbotapi.NewUpdate(0)
 	u.Timeout = 60
 
 	updates, err := bot.GetUpdatesChan(u)
 
+	// Prepare a map of user -> chan update
+	userForwarder := make(map[int]chan tgbotapi.Update)
+
 	for update := range updates {
-		if update.Message == nil { // ignore any non-Message Updates
-			continue
+
+		userId := utils.GetUser(&update).ID
+
+		channel, prs := userForwarder[userId]
+		if !prs {
+			newChannel := make(chan tgbotapi.Update)
+			userForwarder[userId] = newChannel
+			channel = newChannel
+
+			go handleUser(
+				controller,
+				channel,
+			)
 		}
 
-		log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
+		channel <- update
+	}
+}
 
-		database := client.Database("db")
-		messages := database.Collection("messages")
-		messages.InsertOne(ctx, bson.D{
-			{Key: "body", Value: update.Message.Text},
-		})
-		count, err := messages.CountDocuments(ctx, bson.D{})
+func handleUser(
+	ctrl controller.Controller,
+	updates <-chan tgbotapi.Update,
+) {
+	var forwarder *types.Comm
+	commandTermination := make(chan interface{})
 
-		reply := fmt.Sprintf("%d %s", count, update.Message.Text)
+	for {
+		select {
+		case <-commandTermination:
+			// commands wants to end
+			if forwarder != nil {
+				forwarder.StopCommand <- struct{}{}
+				forwarder = nil
+			}
+			break
 
-		if err != nil {
-			reply = err.Error()
+		case update := <-updates:
+			// we received an update message from our user
+			utils.LogReception(update)
+
+			if update.Message != nil && update.Message.IsCommand() {
+
+				// Clean up previous commands
+				if forwarder != nil {
+					forwarder.StopCommand <- struct{}{}
+					forwarder = nil
+				}
+
+				// Get new command started
+				for _, cmd := range ctrl.AvailableCommands() {
+					if update.Message.Command() == cmd.Command {
+						comm := cmd.Instantiation(commandTermination)
+						forwarder = &comm
+						forwarder.Updates <- update
+						break
+					}
+				}
+			} else if forwarder != nil {
+				forwarder.Updates <- update
+			}
+			break
 		}
-
-		msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
-		msg.ReplyToMessageID = update.Message.MessageID
-
-		// Create a placeholder session, to test Neo4j connectivity.
-		session := driver.NewSession(neo4j.SessionConfig{})
-		_ = session.Close()
-
-		_, _ = bot.Send(msg)
 	}
 }
