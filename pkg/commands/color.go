@@ -92,7 +92,7 @@ func Color(
 
 	for {
 		select {
-		case <-comm.QuitCommand:
+		case <-comm.StopCommand:
 			// For now, simply quit. Later, we'll want to add all the information in the db
 			return
 

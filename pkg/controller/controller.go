@@ -35,7 +35,7 @@ func GetController(
 func (c *controller) InstantiateColorCmd() comm.Comm {
 	comm := comm.Comm{
 		Updates:     make(chan tgbotapi.Update),
-		QuitCommand: make(chan interface{}),
+		StopCommand: make(chan interface{}),
 	}
 
 	go commands.Color(comm, c.bot)

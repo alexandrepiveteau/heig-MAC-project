@@ -103,7 +103,7 @@ func handleUser(
 
 			// Clean up previous commands
 			if forwarder != nil {
-				forwarder.QuitCommand <- struct{}{}
+				forwarder.StopCommand <- struct{}{}
 				forwarder = nil
 			}
 
