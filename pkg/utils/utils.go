@@ -32,3 +32,29 @@ func GetUser(update *tgbotapi.Update) *tgbotapi.User {
 
 	return user
 }
+
+// RemoveInlineKeyboard Edits an old message and removes the associated inline keyboard
+func RemoveInlineKeyboard(
+	bot *tgbotapi.BotAPI,
+	update *tgbotapi.Update,
+) {
+
+	msg := tgbotapi.NewEditMessageText(
+		update.CallbackQuery.Message.Chat.ID,
+		update.CallbackQuery.Message.MessageID,
+		update.CallbackQuery.Message.Text,
+	)
+
+	bot.Send(msg)
+}
+
+// GetChatId Returns the id of the chat where the message appeared
+func GetChatId(update *tgbotapi.Update) int64 {
+	if update.Message != nil {
+		return update.Message.Chat.ID
+	} else if update.CallbackQuery != nil {
+		return update.CallbackQuery.Message.Chat.ID
+	}
+
+	return 0
+}
