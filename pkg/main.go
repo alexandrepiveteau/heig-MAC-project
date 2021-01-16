@@ -130,6 +130,7 @@ func handleUser(
 	}
 }
 
+// logReception logs a message based on it's type. The update argument is the message to log.
 func logReception(update tgbotapi.Update) {
 	var username string
 	var text string
@@ -144,40 +145,3 @@ func logReception(update tgbotapi.Update) {
 
 	log.Printf("[%s] %s", username, text)
 }
-
-/*
- * Initial handleUser with DB connection
- *func handleUser(
- *  updates <-chan tgbotapi.Update,
- *  bot *tgbotapi.BotAPI,
- *  client *mongo.Client,
- *  ctx context.Context,
- *  driver neo4j.Driver,
- *) {
- *  for update := range updates {
- *    log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
- *
- *    database := client.Database("db")
- *    messages := database.Collection("messages")
- *    messages.InsertOne(ctx, bson.D{
- *      {Key: "body", Value: update.Message.Text},
- *    })
- *    count, err := messages.CountDocuments(ctx, bson.D{})
- *
- *    reply := fmt.Sprintf("%d %s", count, update.Message.Text)
- *
- *    if err != nil {
- *      reply = err.Error()
- *    }
- *
- *    msg := tgbotapi.NewMessage(update.Message.Chat.ID, reply)
- *    msg.ReplyToMessageID = update.Message.MessageID
- *
- *    // Create a placeholder session, to test Neo4j connectivity.
- *    session := driver.NewSession(neo4j.SessionConfig{})
- *    _ = session.Close()
- *
- *    _, _ = bot.Send(msg)
- *  }
- *}
- */
