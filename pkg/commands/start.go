@@ -1,7 +1,7 @@
 package commands
 
 import (
-	"climb/pkg/comm"
+	"climb/pkg/types"
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -26,7 +26,7 @@ var availableCommands = []CommandDescription{
 
 // Entrypoint of bot command
 func StartCmd(
-	comm comm.Comm,
+	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 ) {

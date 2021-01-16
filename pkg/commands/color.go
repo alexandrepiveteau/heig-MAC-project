@@ -1,8 +1,8 @@
 package commands
 
 import (
-	"climb/pkg/comm"
 	"climb/pkg/commands/keyboards"
+	"climb/pkg/types"
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -84,7 +84,7 @@ var Color = CommandDescription{
 
 // Entrypoint of bot command
 func ColorCmd(
-	comm comm.Comm,
+	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 ) {

@@ -1,8 +1,8 @@
 package controller
 
 import (
-	"climb/pkg/comm"
 	"climb/pkg/commands"
+	"climb/pkg/types"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -12,8 +12,8 @@ import (
 type Controller interface {
 	GetSendChannel() chan<- tgbotapi.Chattable
 
-	InstantiateColorCmd(commandTermination chan interface{}) comm.Comm
-	InstantiateStartCmd(commandTermination chan interface{}) comm.Comm
+	InstantiateColorCmd(commandTermination chan interface{}) types.Comm
+	InstantiateStartCmd(commandTermination chan interface{}) types.Comm
 }
 
 type controller struct {
@@ -43,8 +43,8 @@ func GetController(
 	return &controller
 }
 
-func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) comm.Comm {
-	comm := comm.Comm{
+func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.Comm{
 		Updates:     make(chan tgbotapi.Update),
 		StopCommand: make(chan interface{}),
 	}
@@ -54,8 +54,8 @@ func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) co
 	return comm
 }
 
-func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) comm.Comm {
-	comm := comm.Comm{
+func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.Comm{
 		Updates:     make(chan tgbotapi.Update),
 		StopCommand: make(chan interface{}),
 	}
