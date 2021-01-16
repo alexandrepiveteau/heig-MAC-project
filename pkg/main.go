@@ -122,7 +122,7 @@ func handleUser(
 
 				// Get new command started
 				switch update.Message.Command() {
-				case commands.ColorCommand:
+				case commands.Color.Command:
 					comm := ctrl.InstantiateColorCmd(commandTermination)
 					forwarder = &comm
 					forwarder.Updates <- update

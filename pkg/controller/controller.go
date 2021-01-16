@@ -48,7 +48,7 @@ func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) co
 		StopCommand: make(chan interface{}),
 	}
 
-	go commands.Color(comm, commandTermination, c.bot)
+	go commands.ColorCmd(comm, commandTermination, c.bot)
 
 	return comm
 }

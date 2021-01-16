@@ -77,11 +77,13 @@ func (s *state) leastFav(update tgbotapi.Update) {
 	s.stage = End
 }
 
-// The name of the command
-const ColorCommand = "color"
+var Color = CommandDescription{
+	Command:     "color",
+	Description: "The color command will ask for your favourite color.",
+}
 
 // Entrypoint of bot command
-func Color(
+func ColorCmd(
 	comm comm.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
