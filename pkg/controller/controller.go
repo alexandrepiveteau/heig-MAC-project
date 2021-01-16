@@ -10,7 +10,7 @@ import (
 )
 
 type Controller interface {
-	GetSendChannel() chan<- tgbotapi.Chattable
+	Bot() *tgbotapi.BotAPI
 
 	InstantiateColorCmd(commandTermination chan interface{}) types.Comm
 	InstantiateStartCmd(commandTermination chan interface{}) types.Comm
@@ -20,8 +20,6 @@ type controller struct {
 	bot         *tgbotapi.BotAPI
 	neo4jDriver *neo4j.Driver
 	mongoClient *mongo.Client
-
-	sendChan chan tgbotapi.Chattable
 }
 
 func GetController(
@@ -34,11 +32,7 @@ func GetController(
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
 		mongoClient: mongoClient,
-
-		sendChan: make(chan tgbotapi.Chattable),
 	}
-
-	go controller.startSender()
 
 	return &controller
 }
@@ -65,12 +59,6 @@ func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) ty
 	return comm
 }
 
-func (c *controller) GetSendChannel() chan<- tgbotapi.Chattable {
-	return c.sendChan
-}
-
-func (c *controller) startSender() {
-	for msg := range c.sendChan {
-		c.bot.Send(msg)
-	}
+func (c *controller) Bot() *tgbotapi.BotAPI {
+	return c.bot
 }

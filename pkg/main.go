@@ -95,7 +95,6 @@ func handleUser(
 	updates <-chan tgbotapi.Update,
 ) {
 	var forwarder *comm.Comm
-	send := ctrl.GetSendChannel()
 	commandTermination := make(chan interface{})
 
 	for {
@@ -136,7 +135,7 @@ func handleUser(
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
 					msg.ReplyToMessageID = update.Message.MessageID
 
-					send <- msg
+					ctrl.Bot().Send(msg)
 				}
 			} else if forwarder != nil {
 				forwarder.Updates <- update
