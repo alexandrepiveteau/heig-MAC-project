@@ -12,9 +12,6 @@ import (
 type Controller interface {
 	Bot() *tgbotapi.BotAPI
 
-	InstantiateColorCmd(commandTermination chan interface{}) types.Comm
-	InstantiateStartCmd(commandTermination chan interface{}) types.Comm
-
 	AvailableCommands() []types.CommandDefinition
 }
 
@@ -41,13 +38,13 @@ func GetController(
 	startCmd := types.CommandDefinition{
 		Command:       "start",
 		Description:   "The start command shows available commands",
-		Instantiation: controller.InstantiateStartCmd,
+		Instantiation: controller.instantiateStartCmd,
 	}
 
 	colorCmd := types.CommandDefinition{
 		Command:       "color",
 		Description:   "The color command will ask for your favourite color.",
-		Instantiation: controller.InstantiateColorCmd,
+		Instantiation: controller.instantiateColorCmd,
 	}
 
 	controller.availableCommands = append(
@@ -63,7 +60,7 @@ func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
 }
 
-func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateColorCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
 	go commands.ColorCmd(comm, commandTermination, c.bot)
@@ -71,7 +68,7 @@ func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) ty
 	return comm
 }
 
-func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateStartCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
 	go commands.StartCmd(comm, commandTermination, c.bot)
