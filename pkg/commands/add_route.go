@@ -1,7 +1,9 @@
 package commands
 
 import (
+	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
+	"climb/pkg/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -26,12 +28,15 @@ type addRouteState struct {
 	stage addRouteStage
 
 	// internal data
-	gym  *string
-	name *string
+	gym     *string
+	name    *string
+	grade   *string
+	holds   *string
+	setDate *string
 }
 
 func (s *addRouteState) init(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "In which gym would you like to add the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteGym
@@ -41,7 +46,7 @@ func (s *addRouteState) rcvGym(update tgbotapi.Update) {
 	data := update.Message.Text
 	s.gym = &data
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is the name of the route?")
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the name of the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteName
@@ -49,30 +54,46 @@ func (s *addRouteState) rcvGym(update tgbotapi.Update) {
 
 func (s *addRouteState) rcvName(update tgbotapi.Update) {
 	data := update.Message.Text
-	s.gym = &data
+	s.name = &data
 
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is the difficulty of the route?")
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the difficulty of the route?")
+	msg.ReplyMarkup = keyboards.Grade
 
 	s.bot.Send(msg)
 	s.stage = addRouteGrade
 }
 
 func (s *addRouteState) rcvGrade(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+	data := update.CallbackQuery.Data
+	s.grade = &data
+
+	utils.RemoveInlineKeyboard(s.bot, &update)
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What colors are the holds?")
+	msg.ReplyMarkup = keyboards.Color
 
 	s.bot.Send(msg)
 	s.stage = addRouteHolds
 }
 
 func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+	data := update.CallbackQuery.Data
+	s.holds = &data
+
+	utils.RemoveInlineKeyboard(s.bot, &update)
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "When was the route set? _(DD-MM-YYYY)_")
+	msg.ParseMode = tgbotapi.ModeMarkdown
 
 	s.bot.Send(msg)
 	s.stage = addRouteDate
 }
 
 func (s *addRouteState) rcvDate(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+	data := update.Message.Text
+	s.setDate = &data
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We've added this route.")
 
 	s.bot.Send(msg)
 	s.stage = addRouteEnd
@@ -114,6 +135,7 @@ func AddRouteCmd(
 				break
 			case addRouteDate:
 				state.rcvDate(update)
+				commandTermination <- struct{}{}
 				break
 			case addRouteEnd:
 				break
