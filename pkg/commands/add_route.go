@@ -24,6 +24,10 @@ type addRouteState struct {
 
 	// Stage of the progress in the command
 	stage addRouteStage
+
+	// internal data
+	gym  *string
+	name *string
 }
 
 func (s *addRouteState) init(update tgbotapi.Update) {
@@ -33,35 +37,41 @@ func (s *addRouteState) init(update tgbotapi.Update) {
 	s.stage = addRouteGym
 }
 
-func (s *addRouteState) addGym(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+func (s *addRouteState) rcvGym(update tgbotapi.Update) {
+	data := update.Message.Text
+	s.gym = &data
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is the name of the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteName
 }
 
-func (s *addRouteState) addName(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
+func (s *addRouteState) rcvName(update tgbotapi.Update) {
+	data := update.Message.Text
+	s.gym = &data
+
+	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is the difficulty of the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteGrade
 }
 
-func (s *addRouteState) addGrade(update tgbotapi.Update) {
+func (s *addRouteState) rcvGrade(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteHolds
 }
 
-func (s *addRouteState) addHolds(update tgbotapi.Update) {
+func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
 
 	s.bot.Send(msg)
 	s.stage = addRouteDate
 }
 
-func (s *addRouteState) addDate(update tgbotapi.Update) {
+func (s *addRouteState) rcvDate(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "In which gym would you like to add the route?")
 
 	s.bot.Send(msg)
@@ -91,19 +101,19 @@ func AddRouteCmd(
 				state.init(update)
 				break
 			case addRouteGym:
-				state.addGym(update)
+				state.rcvGym(update)
 				break
 			case addRouteName:
-				state.addName(update)
+				state.rcvName(update)
 				break
 			case addRouteGrade:
-				state.addGrade(update)
+				state.rcvGrade(update)
 				break
 			case addRouteHolds:
-				state.addHolds(update)
+				state.rcvHolds(update)
 				break
 			case addRouteDate:
-				state.addDate(update)
+				state.rcvDate(update)
 				break
 			case addRouteEnd:
 				break
