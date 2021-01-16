@@ -57,6 +57,8 @@ func main() {
 	// Start controller
 	controller := controller.GetController(
 		bot,
+		&neo4jDriver,
+		mongoClient,
 	)
 
 	u := tgbotapi.NewUpdate(0)

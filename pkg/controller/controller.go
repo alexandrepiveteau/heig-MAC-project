@@ -5,6 +5,8 @@ import (
 	"climb/pkg/commands"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Controller interface {
@@ -14,16 +16,24 @@ type Controller interface {
 }
 
 type controller struct {
-	bot      *tgbotapi.BotAPI
+	bot         *tgbotapi.BotAPI
+	neo4jDriver *neo4j.Driver
+	mongoClient *mongo.Client
+
 	sendChan chan tgbotapi.Chattable
 }
 
 func GetController(
 	bot *tgbotapi.BotAPI,
+	neo4jDriver *neo4j.Driver,
+	mongoClient *mongo.Client,
 ) Controller {
 
 	controller := controller{
-		bot:      bot,
+		bot:         bot,
+		neo4jDriver: neo4jDriver,
+		mongoClient: mongoClient,
+
 		sendChan: make(chan tgbotapi.Chattable),
 	}
 
