@@ -23,18 +23,21 @@ type controller struct {
 	availableCommands []types.CommandDefinition
 }
 
+// GetController will return a Controller
 func GetController(
 	bot *tgbotapi.BotAPI,
 	neo4jDriver *neo4j.Driver,
 	mongoClient *mongo.Client,
 ) Controller {
 
+	// Setup controller
 	controller := controller{
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
 		mongoClient: mongoClient,
 	}
 
+	// Define allowd commands
 	startCmd := types.CommandDefinition{
 		Command:       "start",
 		Description:   "The start command shows available commands",
@@ -47,6 +50,7 @@ func GetController(
 		Instantiation: controller.instantiateColorCmd,
 	}
 
+	// Update allowed commands in controller
 	controller.availableCommands = append(
 		controller.availableCommands,
 		startCmd,
@@ -56,9 +60,17 @@ func GetController(
 	return &controller
 }
 
+// Controller functions
+
 func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
 }
+
+func (c *controller) Bot() *tgbotapi.BotAPI {
+	return c.bot
+}
+
+// Private functions
 
 func (c *controller) instantiateColorCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
@@ -74,8 +86,4 @@ func (c *controller) instantiateStartCmd(commandTermination chan interface{}) ty
 	go commands.StartCmd(comm, commandTermination, c.bot)
 
 	return comm
-}
-
-func (c *controller) Bot() *tgbotapi.BotAPI {
-	return c.bot
 }
