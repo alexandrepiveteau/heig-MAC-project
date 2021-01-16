@@ -11,34 +11,34 @@ import (
 // State definition
 // Makeshift enum: https://golang.org/ref/spec#Iota
 
-type Stage int
+type colorStage int
 
 const (
-	Init Stage = iota
-	FavouriteColor
-	LeastFavouriteColor
-	End
+	colorInit colorStage = iota
+	colorFavouriteColor
+	colorLeastFavouriteColor
+	colorEnd
 )
 
-type state struct {
+type colorState struct {
 	bot *tgbotapi.BotAPI
 
 	// Stage of the progress in the command
-	stage Stage
+	stage colorStage
 
 	favouriteColor *string
 	leastFavColor  *string
 }
 
-func (s *state) init(update tgbotapi.Update) {
+func (s *colorState) init(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is your favourite color?")
 	msg.ReplyMarkup = keyboards.Color
 
 	s.bot.Send(msg)
-	s.stage = FavouriteColor
+	s.stage = colorFavouriteColor
 }
 
-func (s *state) favourite(update tgbotapi.Update) {
+func (s *colorState) favourite(update tgbotapi.Update) {
 	// Update state with new information
 	data := update.CallbackQuery.Data
 	s.favouriteColor = &data
@@ -53,10 +53,10 @@ func (s *state) favourite(update tgbotapi.Update) {
 
 	s.bot.Send(msg)
 
-	s.stage = LeastFavouriteColor
+	s.stage = colorLeastFavouriteColor
 }
 
-func (s *state) leastFav(update tgbotapi.Update) {
+func (s *colorState) leastFav(update tgbotapi.Update) {
 	// Update state with new information
 	data := update.CallbackQuery.Data
 	s.leastFavColor = &data
@@ -74,7 +74,7 @@ func (s *state) leastFav(update tgbotapi.Update) {
 
 	s.bot.Send(msg)
 
-	s.stage = End
+	s.stage = colorEnd
 }
 
 var Color = CommandDescription{
@@ -89,9 +89,9 @@ func ColorCmd(
 	bot *tgbotapi.BotAPI,
 ) {
 
-	state := state{
+	state := colorState{
 		bot:            bot,
-		stage:          Init,
+		stage:          colorInit,
 		favouriteColor: nil,
 		leastFavColor:  nil,
 	}
@@ -104,17 +104,17 @@ func ColorCmd(
 
 		case update := <-comm.Updates:
 			switch state.stage {
-			case Init:
+			case colorInit:
 				state.init(update)
 				break
-			case FavouriteColor:
+			case colorFavouriteColor:
 				state.favourite(update)
 				break
-			case LeastFavouriteColor:
+			case colorLeastFavouriteColor:
 				state.leastFav(update)
 				commandTermination <- struct{}{} // Inform that we have terminated
 				break
-			case End:
+			case colorEnd:
 				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
