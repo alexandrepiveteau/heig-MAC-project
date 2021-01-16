@@ -1,9 +1,8 @@
 package main
 
 import (
-	"climb/pkg/comm"
-	"climb/pkg/commands"
 	"climb/pkg/controller"
+	"climb/pkg/types"
 	"climb/pkg/utils"
 	"context"
 	"log"
@@ -94,7 +93,7 @@ func handleUser(
 	ctrl controller.Controller,
 	updates <-chan tgbotapi.Update,
 ) {
-	var forwarder *comm.Comm
+	var forwarder *types.Comm
 	commandTermination := make(chan interface{})
 
 	for {
@@ -120,22 +119,13 @@ func handleUser(
 				}
 
 				// Get new command started
-				switch update.Message.Command() {
-				case commands.Color.Command:
-					comm := ctrl.InstantiateColorCmd(commandTermination)
-					forwarder = &comm
-					forwarder.Updates <- update
-					break
-				case commands.Start.Command:
-					comm := ctrl.InstantiateStartCmd(commandTermination)
-					forwarder = &comm
-					forwarder.Updates <- update
-					break
-				default:
-					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
-					msg.ReplyToMessageID = update.Message.MessageID
-
-					ctrl.Bot().Send(msg)
+				for _, cmd := range ctrl.AvailableCommands() {
+					if update.Message.Command() == cmd.Command {
+						comm := cmd.Instantiation(commandTermination)
+						forwarder = &comm
+						forwarder.Updates <- update
+						break
+					}
 				}
 			} else if forwarder != nil {
 				forwarder.Updates <- update
