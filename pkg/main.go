@@ -31,25 +31,25 @@ func main() {
 	}
 
 	// Neo4J
-	driver, err := neo4j.NewDriver(neo4jHost, neo4j.NoAuth())
+	neo4jDriver, err := neo4j.NewDriver(neo4jHost, neo4j.NoAuth())
 	if err != nil {
 		log.Panic(err)
 	}
-	defer driver.Close()
+	defer neo4jDriver.Close()
 
 	// Mongo
-	client, err := mongo.NewClient(options.Client().ApplyURI(mongoHost))
+	mongoClient, err := mongo.NewClient(options.Client().ApplyURI(mongoHost))
 	if err != nil {
 		log.Panic(err)
 	}
 
 	// TODO : Properly handle context cancellation.
 	ctx := context.TODO()
-	err = client.Connect(ctx)
+	err = mongoClient.Connect(ctx)
 	if err != nil {
 		log.Panic(err)
 	}
-	defer client.Disconnect(ctx)
+	defer mongoClient.Disconnect(ctx)
 
 	bot.Debug = debug == "true"
 	log.Printf("Authorized on account %s", bot.Self.UserName)
@@ -72,7 +72,6 @@ func main() {
 		userId := utils.GetUser(&update).ID
 
 		channel, prs := userForwarder[userId]
-
 		if !prs {
 			newChannel := make(chan tgbotapi.Update)
 			userForwarder[userId] = newChannel
