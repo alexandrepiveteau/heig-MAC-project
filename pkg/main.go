@@ -69,12 +69,7 @@ func main() {
 
 	for update := range updates {
 
-		var userId int
-		if update.Message != nil {
-			userId = update.Message.From.ID
-		} else if update.CallbackQuery != nil {
-			userId = update.CallbackQuery.From.ID
-		}
+		userId := utils.GetUser(&update).ID
 
 		channel, prs := userForwarder[userId]
 
