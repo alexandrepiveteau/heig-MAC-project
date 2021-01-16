@@ -80,6 +80,7 @@ func (s *state) leastFav(update tgbotapi.Update) {
 // Entrypoint of bot command
 func Color(
 	comm comm.Comm,
+	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 ) {
 
@@ -106,6 +107,7 @@ func Color(
 				break
 			case LeastFavouriteColor:
 				state.leastFav(update)
+				commandTermination <- struct{}{} // Inform that we have terminated
 				break
 			case End:
 				break
