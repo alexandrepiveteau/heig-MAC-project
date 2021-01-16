@@ -38,10 +38,7 @@ func GetController(
 }
 
 func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) types.Comm {
-	comm := types.Comm{
-		Updates:     make(chan tgbotapi.Update),
-		StopCommand: make(chan interface{}),
-	}
+	comm := types.InitComm()
 
 	go commands.ColorCmd(comm, commandTermination, c.bot)
 
@@ -49,10 +46,7 @@ func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) ty
 }
 
 func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) types.Comm {
-	comm := types.Comm{
-		Updates:     make(chan tgbotapi.Update),
-		StopCommand: make(chan interface{}),
-	}
+	comm := types.InitComm()
 
 	go commands.StartCmd(comm, commandTermination, c.bot)
 

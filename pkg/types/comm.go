@@ -7,3 +7,11 @@ type Comm struct {
 	Updates     chan tgbotapi.Update
 	StopCommand chan interface{}
 }
+
+// InitComm will initialize a Comm and return it
+func InitComm() Comm {
+	return Comm{
+		Updates:     make(chan tgbotapi.Update),
+		StopCommand: make(chan interface{}),
+	}
+}
