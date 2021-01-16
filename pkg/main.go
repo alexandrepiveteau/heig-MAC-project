@@ -101,9 +101,9 @@ func handleUser(
 
 	for update := range updates {
 
+		logReception(update)
+
 		if update.Message != nil && update.Message.IsCommand() {
-			// log the message
-			log.Printf("[%s] %s", update.Message.From.UserName, update.Message.Text)
 
 			// Clean up previous commands
 			if forwarder != nil {
@@ -128,6 +128,21 @@ func handleUser(
 			forwarder.Updates <- update
 		}
 	}
+}
+
+func logReception(update tgbotapi.Update) {
+	var username string
+	var text string
+
+	if update.Message != nil {
+		username = update.Message.From.UserName
+		text = update.Message.Text
+	} else if update.CallbackQuery != nil {
+		username = update.CallbackQuery.From.UserName
+		text = update.CallbackQuery.Data
+	}
+
+	log.Printf("[%s] %s", username, text)
 }
 
 /*
