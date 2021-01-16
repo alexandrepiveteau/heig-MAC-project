@@ -77,11 +77,6 @@ func (s *colorState) leastFav(update tgbotapi.Update) {
 	s.stage = colorEnd
 }
 
-var Color = CommandDescription{
-	Command:     "color",
-	Description: "The color command will ask for your favourite color.",
-}
-
 // Entrypoint of bot command
 func ColorCmd(
 	comm types.Comm,

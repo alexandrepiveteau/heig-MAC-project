@@ -83,7 +83,7 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 func (c *controller) instantiateStartCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
-	go commands.StartCmd(comm, commandTermination, c.bot)
+	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
 
 	return comm
 }

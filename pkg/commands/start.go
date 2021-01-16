@@ -7,28 +7,12 @@ import (
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
 
-// A CommandDescription is used to share available commands, how we can call
-// them and what they are used for
-type CommandDescription struct {
-	Command     string
-	Description string
-}
-
-var Start = CommandDescription{
-	Command:     "start",
-	Description: "The start command shows available commands",
-}
-
-var availableCommands = []CommandDescription{
-	Start,
-	Color,
-}
-
 // Entrypoint of bot command
 func StartCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
+	availableCommands []types.CommandDefinition,
 ) {
 	for {
 		select {
