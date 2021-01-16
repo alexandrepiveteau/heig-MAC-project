@@ -127,6 +127,11 @@ func handleUser(
 					forwarder = &comm
 					forwarder.Updates <- update
 					break
+				case commands.Start.Command:
+					comm := ctrl.InstantiateStartCmd(commandTermination)
+					forwarder = &comm
+					forwarder.Updates <- update
+					break
 				default:
 					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
 					msg.ReplyToMessageID = update.Message.MessageID

@@ -13,6 +13,7 @@ type Controller interface {
 	GetSendChannel() chan<- tgbotapi.Chattable
 
 	InstantiateColorCmd(commandTermination chan interface{}) comm.Comm
+	InstantiateStartCmd(commandTermination chan interface{}) comm.Comm
 }
 
 type controller struct {
@@ -49,6 +50,17 @@ func (c *controller) InstantiateColorCmd(commandTermination chan interface{}) co
 	}
 
 	go commands.ColorCmd(comm, commandTermination, c.bot)
+
+	return comm
+}
+
+func (c *controller) InstantiateStartCmd(commandTermination chan interface{}) comm.Comm {
+	comm := comm.Comm{
+		Updates:     make(chan tgbotapi.Update),
+		StopCommand: make(chan interface{}),
+	}
+
+	go commands.StartCmd(comm, commandTermination, c.bot)
 
 	return comm
 }

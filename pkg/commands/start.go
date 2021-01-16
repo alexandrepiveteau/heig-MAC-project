@@ -40,13 +40,14 @@ func StartCmd(
 
 			for _, cmd := range availableCommands {
 				text += fmt.Sprintf(
-					"%s: %s\n",
+					"/`%s`: %s\n",
 					cmd.Command,
 					cmd.Description,
 				)
 			}
 
 			msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
+			msg.ParseMode = tgbotapi.ModeMarkdown
 			bot.Send(msg)
 
 			commandTermination <- struct{}{} // Inform that we have terminated
