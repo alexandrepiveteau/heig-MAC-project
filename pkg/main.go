@@ -94,34 +94,47 @@ func handleUser(
 ) {
 	var forwarder *comm.Comm
 	send := ctrl.GetSendChannel()
+	commandTermination := make(chan interface{})
 
-	for update := range updates {
-
-		utils.LogReception(update)
-
-		if update.Message != nil && update.Message.IsCommand() {
-
-			// Clean up previous commands
+	for {
+		select {
+		case <-commandTermination:
+			// commands wants to end
 			if forwarder != nil {
 				forwarder.StopCommand <- struct{}{}
 				forwarder = nil
 			}
+			break
 
-			// Get new command started
-			switch update.Message.Command() {
-			case "color":
-				comm := ctrl.InstantiateColorCmd()
-				forwarder = &comm
+		case update := <-updates:
+			// we received an update message from our user
+			utils.LogReception(update)
+
+			if update.Message != nil && update.Message.IsCommand() {
+
+				// Clean up previous commands
+				if forwarder != nil {
+					forwarder.StopCommand <- struct{}{}
+					forwarder = nil
+				}
+
+				// Get new command started
+				switch update.Message.Command() {
+				case "color":
+					comm := ctrl.InstantiateColorCmd()
+					forwarder = &comm
+					forwarder.Updates <- update
+					break
+				default:
+					msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
+					msg.ReplyToMessageID = update.Message.MessageID
+
+					send <- msg
+				}
+			} else if forwarder != nil {
 				forwarder.Updates <- update
-				break
-			default:
-				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "I don't know about this...")
-				msg.ReplyToMessageID = update.Message.MessageID
-
-				send <- msg
 			}
-		} else if forwarder != nil {
-			forwarder.Updates <- update
+			break
 		}
 	}
 }
