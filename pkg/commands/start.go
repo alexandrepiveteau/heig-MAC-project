@@ -2,6 +2,7 @@ package commands
 
 import (
 	"climb/pkg/comm"
+	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 )
@@ -18,6 +19,11 @@ var Start = CommandDescription{
 	Description: "The start command shows available commands",
 }
 
+var availableCommands = []CommandDescription{
+	Start,
+	Color,
+}
+
 // Entrypoint of bot command
 func StartCmd(
 	comm comm.Comm,
@@ -30,7 +36,17 @@ func StartCmd(
 			return
 
 		case update := <-comm.Updates:
-			msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry, I'm lost.")
+			var text string
+
+			for _, cmd := range availableCommands {
+				text += fmt.Sprintf(
+					"%s: %s\n",
+					cmd.Command,
+					cmd.Description,
+				)
+			}
+
+			msg := tgbotapi.NewMessage(update.Message.Chat.ID, text)
 			bot.Send(msg)
 
 			commandTermination <- struct{}{} // Inform that we have terminated
