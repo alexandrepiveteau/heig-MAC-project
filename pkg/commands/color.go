@@ -77,6 +77,9 @@ func (s *state) leastFav(update tgbotapi.Update) {
 	s.stage = End
 }
 
+// The name of the command
+const ColorCommand = "color"
+
 // Entrypoint of bot command
 func Color(
 	comm comm.Comm,

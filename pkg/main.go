@@ -2,6 +2,7 @@ package main
 
 import (
 	"climb/pkg/comm"
+	"climb/pkg/commands"
 	"climb/pkg/controller"
 	"climb/pkg/utils"
 	"context"
@@ -121,7 +122,7 @@ func handleUser(
 
 				// Get new command started
 				switch update.Message.Command() {
-				case "color":
+				case commands.ColorCommand:
 					comm := ctrl.InstantiateColorCmd(commandTermination)
 					forwarder = &comm
 					forwarder.Updates <- update
