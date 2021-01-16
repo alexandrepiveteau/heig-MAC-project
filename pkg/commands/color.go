@@ -2,22 +2,10 @@ package commands
 
 import (
 	"climb/pkg/comm"
+	"climb/pkg/commands/keyboards"
 	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-)
-
-var colorKBD = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Red", "red"),
-		tgbotapi.NewInlineKeyboardButtonData("Green", "green"),
-		tgbotapi.NewInlineKeyboardButtonData("Blue", "blue"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("Yellow", "yellow"),
-		tgbotapi.NewInlineKeyboardButtonData("Orange", "orange"),
-		tgbotapi.NewInlineKeyboardButtonData("Gray", "gray"),
-	),
 )
 
 // State definition
@@ -44,7 +32,7 @@ type state struct {
 
 func (s *state) init(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is your favourite color?")
-	msg.ReplyMarkup = colorKBD
+	msg.ReplyMarkup = keyboards.Color
 
 	s.bot.Send(msg)
 	s.stage = FavouriteColor
@@ -61,7 +49,7 @@ func (s *state) favourite(update tgbotapi.Update) {
 	text := "Ok, but what is your least favourite color?"
 
 	msg := tgbotapi.NewEditMessageText(chatId, msgID, text)
-	msg.ReplyMarkup = &colorKBD
+	msg.ReplyMarkup = &keyboards.Color
 
 	s.bot.Send(msg)
 
