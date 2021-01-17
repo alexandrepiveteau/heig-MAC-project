@@ -112,7 +112,7 @@ func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "How enjoyable was the route?")
-	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.RatingChoices, 1)
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.RatingChoices, 5)
 
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRouteRating
@@ -121,7 +121,7 @@ func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
 func (s *climbRouteState) rcvRating(update tgbotapi.Update) bool {
 	data, present := utils.GetInlineKeyboardData(
 		update,
-		keyboards.GetActions(keyboards.GradeChoices)...,
+		keyboards.GetActions(keyboards.RatingChoices)...,
 	)
 	if !present {
 		return false // ignore update
