@@ -103,7 +103,7 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
-	go commands.AddRouteCmd(comm, commandTermination, c.bot)
+	go commands.AddRouteCmd(comm, commandTermination, c.bot, c.mongodb)
 
 	return comm
 }

@@ -6,6 +6,7 @@ import (
 	"climb/pkg/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type addRouteStage int
@@ -22,7 +23,8 @@ const (
 )
 
 type addRouteState struct {
-	bot *tgbotapi.BotAPI
+	bot     *tgbotapi.BotAPI
+	mongodb *mongo.Database
 
 	// Stage of the progress in the command
 	stage addRouteStage
@@ -103,10 +105,13 @@ func AddRouteCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
+	mongodb *mongo.Database,
 ) {
 
 	state := addRouteState{
-		bot:   bot,
+		bot:     bot,
+		mongodb: mongodb,
+
 		stage: addRouteInit,
 	}
 
