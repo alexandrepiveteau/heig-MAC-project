@@ -7,6 +7,7 @@ import (
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -24,8 +25,9 @@ const (
 )
 
 type addRouteState struct {
-	bot     *tgbotapi.BotAPI
-	mongodb *mongo.Database
+	bot         *tgbotapi.BotAPI
+	mongodb     *mongo.Database
+	neo4jDriver *neo4j.Driver
 
 	// Stage of the progress in the command
 	stage addRouteStage
@@ -124,11 +126,13 @@ func AddRouteCmd(
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
+	neo4jDriver *neo4j.Driver,
 ) {
 
 	state := addRouteState{
-		bot:     bot,
-		mongodb: mongodb,
+		bot:         bot,
+		mongodb:     mongodb,
+		neo4jDriver: neo4jDriver,
 
 		stage: addRouteInit,
 	}
