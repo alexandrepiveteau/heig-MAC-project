@@ -58,3 +58,29 @@ func GetChatId(update *tgbotapi.Update) int64 {
 
 	return 0
 }
+
+func GetMessageData(update tgbotapi.Update) (string, bool) {
+	if update.Message == nil {
+		return "", false
+	}
+	return update.Message.Text, true
+}
+
+func GetInlineKeyboardData(update tgbotapi.Update, choices ...string) (string, bool) {
+
+	// Retrieve the callback data from the inline keyboard.
+	if update.CallbackQuery == nil {
+		return "", false
+	}
+	data := update.CallbackQuery.Data
+
+	// Find the value in the choices.
+	for _, choice := range choices {
+		if data == choice {
+			return data, true
+		}
+	}
+
+	// We have not found the a valid choice
+	return "", false
+}
