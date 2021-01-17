@@ -26,7 +26,37 @@ func (a *Attempt) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
 ) (primitive.ObjectID, error) {
-	return primitive.NewObjectID(), errors.New("Not implemented")
+
+	// 1. Store in mongodb
+	id, err := a.createInMongo(db, neo4jDriver)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// 2. Create in Neo4j
+	err = a.createInNeo4j(neo4jDriver, id)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// 3. Link with Route
+	gymId, err := GymGetId(db, a.GymName)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	routeId, err := RouteGetId(db, gymId, a.RouteName)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	err = a.linkWith(neo4jDriver, id, routeId)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// Return mongo's id
+	return id, nil
 }
 
 func (a *Attempt) createInMongo(
