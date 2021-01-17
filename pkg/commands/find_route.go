@@ -43,7 +43,11 @@ func (s *findRouteState) init(update tgbotapi.Update) {
 }
 
 func (s *findRouteState) rcvGym(update tgbotapi.Update) {
-	data := update.Message.Text
+	data, present := utils.GetMessageData(update)
+	if !present {
+		return // ignore update
+	}
+
 	s.gym = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the grade of the route?")
@@ -54,29 +58,44 @@ func (s *findRouteState) rcvGym(update tgbotapi.Update) {
 }
 
 func (s *findRouteState) rcvGrade(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.GradeChoices)...,
+	)
+	if !present {
+		return // ignore update
+	}
+
 	s.grade = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What color are the holds?")
-	msg.ReplyMarkup = keyboards.Color
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.ColorChoices, 3)
 
 	s.bot.Send(msg)
 	s.stage = findRouteHolds
 }
 
-func (s *findRouteState) rcvHolds(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+func (s *findRouteState) rcvHolds(update tgbotapi.Update) bool {
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.ColorChoices)...,
+	)
+	if !present {
+		return false // ignore update
+	}
+
 	s.holds = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We're looking for this route: Gym="+*s.gym+" Grade="+*s.grade+" HoldsColor="+*s.holds)
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We're looking for this route")
 	msg.ParseMode = tgbotapi.ModeMarkdown
 
 	s.bot.Send(msg)
 	s.stage = findRouteEnd
+	return true
 }
 
 func FindRouteCmd(
@@ -111,8 +130,9 @@ func FindRouteCmd(
 				state.rcvGrade(update)
 				break
 			case findRouteHolds:
-				state.rcvHolds(update)
-				commandTermination <- struct{}{}
+				if finish := state.rcvHolds(update); finish {
+					commandTermination <- struct{}{}
+				}
 				// TODO: Return found routes to user
 				break
 			case findRouteEnd:

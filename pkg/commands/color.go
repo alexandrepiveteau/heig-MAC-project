@@ -32,7 +32,7 @@ type colorState struct {
 
 func (s *colorState) init(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(update.Message.Chat.ID, "What is your favourite color?")
-	msg.ReplyMarkup = keyboards.Color
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.ColorChoices, 3)
 
 	s.bot.Send(msg)
 	s.stage = colorFavouriteColor
@@ -49,7 +49,7 @@ func (s *colorState) favourite(update tgbotapi.Update) {
 	text := "Ok, but what is your least favourite color?"
 
 	msg := tgbotapi.NewEditMessageText(chatId, msgID, text)
-	msg.ReplyMarkup = &keyboards.Color
+	msg.ReplyMarkup = &(keyboards.Color)
 
 	s.bot.Send(msg)
 
