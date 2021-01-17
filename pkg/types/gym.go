@@ -27,48 +27,48 @@ type Gym struct {
 func (g *Gym) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// 1. Create in MongoDB
 	id, err := g.createInMongo(db)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// 2. Create in Neo4j
 	err = g.createInNeo4j(neo4jDriver, id)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// Return mongo's id
-	return id, nil
+	return id.Hex(), nil
 }
 
 func (g *Gym) createInMongo(
 	db *mongo.Database,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	id, err := gymCollection(db).InsertOne(
 		context.TODO(),
 		bson.D{{Key: "name", Value: g.Name}},
 	)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// Assert type ObjectID
 	objectId, ok := id.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
 
 func (g *Gym) createInNeo4j(
 	driver neo4j.Driver,
-	id primitive.ObjectID,
+	gymId string,
 ) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -77,7 +77,7 @@ func (g *Gym) createInNeo4j(
 
 		cypher := "CREATE (g:Gym) SET g = {name: $name, id: $id} RETURN g"
 		params := map[string]interface{}{
-			"id":   id.String(),
+			"id":   gymId,
 			"name": g.Name,
 		}
 
@@ -95,14 +95,14 @@ func (g *Gym) createInNeo4j(
 func GymGetId(
 	db *mongo.Database,
 	name string,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// Filter all gyms by name
 	var res bson.M
 	filter := bson.D{{Key: "name", Value: name}}
 	err := gymCollection(db).FindOne(context.TODO(), filter).Decode(&res)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	log.Printf("%+v\n", res)
@@ -111,8 +111,8 @@ func GymGetId(
 	id := res["_id"]
 	objectId, ok := id.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
