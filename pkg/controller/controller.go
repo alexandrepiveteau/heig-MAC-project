@@ -83,7 +83,7 @@ func GetController(
 
 	profileCmd := types.CommandDefinition{
 		Command:       "profile",
-		Description:   "The profile will allow you to stop following another username",
+		Description:   "The profile will allow you to see infos about an user, like best route climbed and follower numbers",
 		Instantiation: controller.instantiateProfileCmd,
 	}
 
