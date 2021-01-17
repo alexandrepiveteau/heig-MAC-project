@@ -77,7 +77,7 @@ func GetController(
 
 	unfollowCmd := types.CommandDefinition{
 		Command:       "unfollow",
-		Description:   "The unfollow will allow you to stop following another username",
+		Description:   "The unfollow will allow you to stop following another user",
 		Instantiation: controller.instantiateUnfollowCmd,
 	}
 
