@@ -50,7 +50,7 @@ func (r *Route) Store(
 	err = r.linkWith(neo4jDriver, id, gymId)
 
 	// Return mongo's id
-	return id.Hex(), nil
+	return id, nil
 }
 
 func (r *Route) createInMongo(

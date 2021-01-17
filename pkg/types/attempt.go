@@ -57,7 +57,7 @@ func (a *Attempt) Store(
 	}
 
 	// Return mongo's id
-	return id.Hex(), nil
+	return id, nil
 }
 
 func (a *Attempt) createInMongo(

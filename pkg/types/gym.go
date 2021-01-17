@@ -42,7 +42,7 @@ func (g *Gym) Store(
 	}
 
 	// Return mongo's id
-	return id.Hex(), nil
+	return id, nil
 }
 
 func (g *Gym) createInMongo(
