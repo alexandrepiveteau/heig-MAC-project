@@ -81,7 +81,7 @@ func UnfollowCmd(
 				}
 				state.stage = unfollowEnd
 				commandTermination <- struct{}{}
-				break;
+				break
 			default:
 				msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Sorry I'm lost")
 				bot.Send(msg)
