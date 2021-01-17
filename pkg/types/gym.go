@@ -3,7 +3,6 @@ package types
 import (
 	"context"
 	"errors"
-	"log"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/bson"
@@ -104,8 +103,6 @@ func GymGetId(
 	if err != nil {
 		return "", err
 	}
-
-	log.Printf("%+v\n", res)
 
 	// Assert ObjectID type on _id
 	id := res["_id"]
