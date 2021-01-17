@@ -102,9 +102,9 @@
    - B: In which gym is the route you want to challenge @personUsername to? (Custom keyboard containing gyms)
    - B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
 6. U: Clicks on the correct gym
-7. B: What is the route's name? (If you don't see it in this list, enter it's name manually.) (Custom keyboard containing route names (sorted by recent dates?)
+7. B: What is the route's name? (If you don't see it in this list, enter its name manually.) (Custom keyboard containing route names (sorted by recent dates?)
 8. U: Clicks on the correct route
 9. Two cases:
-   - B: I don't recognize this route/gym combination. Try checking for spelling mistaked, or add the route to my database using /addRoute.
+   - B: I don't recognize this route/gym combination. Try checking for spelling mistakes, or add the route to my database using /addRoute.
    - B: Great! You challenged @personUsername to climb routeName in GymName! 
-10. B -> @personUsernam: @User challenged you to beat the route "routeName" in the gym "gymName". Don't forget to mark the route as climb using /climbRoute once you succeed!
+10. B -> @personUsernam: @User challenged you to beat the route "routeName" in the gym "gymName". Don't forget to save your attempt using /climbRoute once you succeed!
