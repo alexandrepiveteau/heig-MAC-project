@@ -115,7 +115,7 @@ func (s *addRouteState) save() {
 
 	log.Println("Saving route")
 
-	_, err := route.Store(s.mongodb)
+	_, err := route.Store(s.mongodb, s.neo4jDriver)
 	if err != nil {
 		log.Printf("Error saving Route: %s\n", err.Error())
 	}

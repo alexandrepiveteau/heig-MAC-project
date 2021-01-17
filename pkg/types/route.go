@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -19,6 +20,23 @@ type Route struct {
 
 // Store will store a route in MongoDB correctly
 func (r *Route) Store(
+	db *mongo.Database,
+	neo4jDriver *neo4j.Driver,
+) (primitive.ObjectID, error) {
+	// 1. Store in mongodb
+	id, err := r.createInMongo(db)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// 2. Create in Neo4j
+	r.createInNeo4j(neo4jDriver)
+
+	// Return mongo's id
+	return id, nil
+}
+
+func (r *Route) createInMongo(
 	db *mongo.Database,
 ) (primitive.ObjectID, error) {
 
@@ -54,4 +72,7 @@ func (r *Route) Store(
 	}
 
 	return objectId, nil
+}
+
+func (r *Route) createInNeo4j(driver *neo4j.Driver) {
 }
