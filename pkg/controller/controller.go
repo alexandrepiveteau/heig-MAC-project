@@ -38,7 +38,7 @@ func GetController(
 		mongodb:     mongoClient.Database("db"),
 	}
 
-	// Define allowd commands
+	// Define allowed commands
 	startCmd := types.CommandDefinition{
 		Command:       "start",
 		Description:   "The start command shows available commands",
@@ -51,21 +51,27 @@ func GetController(
 		Instantiation: controller.instantiateColorCmd,
 	}
 
+	challengeCmd := types.CommandDefinition{
+		Command:       "challenge",
+		Description:   "The challenge command will allow you to challenge a user you follow to climb a route",
+		Instantiation: controller.instantiateChallengeCmd,
+	}
+
 	addRouteCmd := types.CommandDefinition{
 		Command:       "addRoute",
-		Description:   "The addRoute will allow you to create a new route",
+		Description:   "The addRoute command will allow you to create a new route",
 		Instantiation: controller.instantiateAddRouteCmd,
 	}
 
 	climbRouteCmd := types.CommandDefinition{
 		Command:       "climbRoute",
-		Description:   "The climbRoute will allow you to save an attempt",
+		Description:   "The climbRoute command will allow you to save an attempt",
 		Instantiation: controller.instantiateClimbRouteCmd,
 	}
 
 	findRouteCmd := types.CommandDefinition{
 		Command:       "findRoute",
-		Description:   "The findRoute will allow you to find the name of routes",
+		Description:   "The findRoute command will allow you to find the name of routes",
 		Instantiation: controller.instantiateFindRouteCmd,
 	}
 
@@ -74,6 +80,7 @@ func GetController(
 		controller.availableCommands,
 		startCmd,
 		colorCmd,
+		challengeCmd,
 		addRouteCmd,
 		climbRouteCmd,
 		findRouteCmd,
@@ -110,6 +117,20 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 	comm := types.InitComm()
 
 	go commands.ColorCmd(comm, commandTermination, c.bot)
+
+	return comm
+}
+
+func (c *controller) instantiateChallengeCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.InitComm()
+
+	go commands.ChallengeCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
 
 	return comm
 }
