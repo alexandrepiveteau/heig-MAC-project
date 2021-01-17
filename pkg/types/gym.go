@@ -36,7 +36,7 @@ func (g *Gym) Store(
 	}
 
 	// 2. Create in Neo4j
-	err = g.createInNeo4j(neo4jDriver)
+	err = g.createInNeo4j(neo4jDriver, id)
 	if err != nil {
 		return primitive.NewObjectID(), err
 	}
@@ -68,14 +68,18 @@ func (g *Gym) createInMongo(
 	return objectId, nil
 }
 
-func (g *Gym) createInNeo4j(driver neo4j.Driver) error {
+func (g *Gym) createInNeo4j(
+	driver neo4j.Driver,
+	id primitive.ObjectID,
+) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
 	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 
-		cypher := "CREATE (g:Gym) SET g.name = $name RETURN g"
+		cypher := "CREATE (g:Gym) SET g = {name: $name, id: $id} RETURN g"
 		params := map[string]interface{}{
+			"id":   id.String(),
 			"name": g.Name,
 		}
 
@@ -96,7 +100,7 @@ func GymGetId(
 ) (primitive.ObjectID, error) {
 
 	// Filter all gyms by name
-	filterCursor, err := gymCollection(db).Find(context.TODO(), bson.M{"name": "Le cube"})
+	filterCursor, err := gymCollection(db).Find(context.TODO(), bson.M{"name": name})
 	if err != nil {
 		log.Fatal(err)
 	}

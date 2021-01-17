@@ -30,14 +30,17 @@ func (r *Route) Store(
 	}
 
 	// 2. Create in Neo4j
-	err = r.createInNeo4j(neo4jDriver, id.String())
+	err = r.createInNeo4j(neo4jDriver, id)
 	if err != nil {
 		return primitive.NewObjectID(), err
 	}
 
 	// 3. Link with Gym
-	gym := Gym{Name: r.Gym} // Don't need to ask for it since we can create it
-	err = r.linkWith(neo4jDriver, id.String(), gym)
+	gymId, err := GymGetId(db, r.Gym)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+	err = r.linkWith(neo4jDriver, id, gymId)
 
 	// Return mongo's id
 	return id, nil
@@ -85,7 +88,10 @@ func (r *Route) createInMongo(
 	return objectId, nil
 }
 
-func (r *Route) createInNeo4j(driver neo4j.Driver, id string) error {
+func (r *Route) createInNeo4j(
+	driver neo4j.Driver,
+	id primitive.ObjectID,
+) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
 
@@ -101,7 +107,7 @@ func (r *Route) createInNeo4j(driver neo4j.Driver, id string) error {
 							RETURN r`
 
 		params := map[string]interface{}{
-			"id":    id,
+			"id":    id.String(),
 			"name":  r.Name,
 			"grade": r.Grade,
 			"holds": r.Holds,
@@ -120,8 +126,8 @@ func (r *Route) createInNeo4j(driver neo4j.Driver, id string) error {
 
 func (r *Route) linkWith(
 	driver neo4j.Driver,
-	id string,
-	gym Gym,
+	routeId primitive.ObjectID,
+	gymId primitive.ObjectID,
 ) error {
 
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -130,13 +136,13 @@ func (r *Route) linkWith(
 	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 
 		cypher := `MATCH (r:Route) WHERE r.id = $rId
-							MATCH (g:Gym) WHERE g.name = $gName
+							MATCH (g:Gym) WHERE g.id = $gId
 							CREATE (r)-[:IS_IN]->(g)
 							RETURN r`
 
 		params := map[string]interface{}{
-			"rId":   id,
-			"gName": gym.Name,
+			"rId": routeId.String(),
+			"gId": gymId.String(),
 		}
 
 		transRes, err := transaction.Run(cypher, params)
