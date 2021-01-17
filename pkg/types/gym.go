@@ -37,7 +37,7 @@ func (g *Gym) Store(
 		log.Println(err.Error())
 	}
 
-	// Cast result to ObjectID
+	// Assert type ObjectID
 	objectId, ok := id.InsertedID.(primitive.ObjectID)
 	if !ok {
 		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
