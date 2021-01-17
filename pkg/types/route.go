@@ -59,7 +59,7 @@ func (r *Route) createInMongo(
 ) (primitive.ObjectID, error) {
 
 	// Get corresponding gym or create it
-	gymId, err := GymGetId(db, r.Name)
+	gymId, err := GymGetId(db, r.Gym)
 	if err != nil {
 		fmt.Printf("%s\n", err.Error())
 
