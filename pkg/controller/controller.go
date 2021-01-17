@@ -75,6 +75,18 @@ func GetController(
 		Instantiation: controller.instantiateFindRouteCmd,
 	}
 
+	followCmd := types.CommandDefinition{
+		Command:       "follow",
+		Description:   "The follow will allow you to follow another user",
+		Instantiation: controller.instantiateFollowCmd,
+	}
+
+	unfollowCmd := types.CommandDefinition{
+		Command:       "unfollow",
+		Description:   "The unfollow will allow you to stop following another user",
+		Instantiation: controller.instantiateUnfollowCmd,
+	}
+
 	// Update allowed commands in controller
 	controller.availableCommands = append(
 		controller.availableCommands,
@@ -84,6 +96,8 @@ func GetController(
 		addRouteCmd,
 		climbRouteCmd,
 		findRouteCmd,
+		followCmd,
+		unfollowCmd,
 	)
 
 	return &controller
@@ -167,6 +181,34 @@ func (c *controller) instantiateFindRouteCmd(commandTermination chan interface{}
 	comm := types.InitComm()
 
 	go commands.FindRouteCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
+
+	return comm
+}
+
+func (c *controller) instantiateFollowCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.InitComm()
+
+	go commands.FollowCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
+
+	return comm
+}
+
+func (c *controller) instantiateUnfollowCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.InitComm()
+
+	go commands.UnfollowCmd(
 		comm,
 		commandTermination,
 		c.bot,
