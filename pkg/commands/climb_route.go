@@ -4,7 +4,9 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
+	"fmt"
 	"log"
+	"strconv"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -19,6 +21,7 @@ const (
 	climbRouteRoute
 	climbRoutePerformance
 	climbRouteGrade
+	climbRouteRating
 	climbRouteEnd
 )
 
@@ -35,6 +38,7 @@ type climbRouteState struct {
 	route       *string
 	performance *string
 	grade       *string
+	rating      *int64
 }
 
 func (s *climbRouteState) init(update tgbotapi.Update) {
@@ -95,15 +99,39 @@ func (s *climbRouteState) rcvPerformance(update tgbotapi.Update) {
 	s.stage = climbRouteGrade
 }
 
-func (s *climbRouteState) rcvGrade(update tgbotapi.Update) bool {
+func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
 	data, present := utils.GetInlineKeyboardData(
 		update,
 		keyboards.GetActions(keyboards.GradeChoices)...,
 	)
 	if !present {
-		return false // ignore update
+		return // ignore update
 	}
 	s.grade = &data
+
+	utils.RemoveInlineKeyboard(s.bot, &update)
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "How enjoyable was the route?")
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.RatingChoices, 5)
+
+	_, _ = s.bot.Send(msg)
+	s.stage = climbRouteRating
+}
+
+func (s *climbRouteState) rcvRating(update tgbotapi.Update) bool {
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.RatingChoices)...,
+	)
+	if !present {
+		return false // ignore update
+	}
+	num, err := strconv.ParseInt(data, 10, 64)
+	if err != nil {
+		fmt.Printf("Parsing int from data: %s", err.Error())
+		return false
+	}
+	s.rating = &num
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
@@ -119,6 +147,7 @@ func (s *climbRouteState) save() {
 		RouteName:     *s.route,
 		ProposedGrade: *s.grade,
 		Performance:   *s.performance,
+		Rating:        *s.rating,
 	}
 
 	log.Printf("Saving attempt %+v\n", attempt)
@@ -166,7 +195,10 @@ func ClimbRouteCmd(
 				state.rcvPerformance(update)
 				break
 			case climbRouteGrade:
-				if finish := state.rcvGrade(update); finish {
+				state.rcvGrade(update)
+				break
+			case climbRouteRating:
+				if finish := state.rcvRating(update); finish {
 					commandTermination <- struct{}{}
 				}
 				break

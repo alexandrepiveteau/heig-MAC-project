@@ -21,6 +21,7 @@ type Attempt struct {
 	RouteName     string
 	ProposedGrade string
 	Performance   string
+	Rating        int64
 }
 
 func (a *Attempt) Store(
@@ -83,6 +84,7 @@ func (a *Attempt) createInMongo(
 			{Key: "route", Value: routeId},
 			{Key: "proposedGrade", Value: a.ProposedGrade},
 			{Key: "performance", Value: a.Performance},
+			{Key: "rating", Value: a.Rating},
 		},
 	)
 
@@ -112,7 +114,8 @@ func (a *Attempt) createInNeo4j(
 							SET a = {
 							  id: $id,
 								proposedGrade: $proposedGrade,
-								performance: $performance
+								performance: $performance,
+								rating: $rating
 								}
 							RETURN a`
 
@@ -120,6 +123,7 @@ func (a *Attempt) createInNeo4j(
 			"id":            attemptId,
 			"proposedGrade": a.ProposedGrade,
 			"performance":   a.Performance,
+			"rating":        a.Rating,
 		}
 
 		transRes, err := transaction.Run(cypher, params)
