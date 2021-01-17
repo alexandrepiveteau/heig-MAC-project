@@ -100,3 +100,35 @@ func (a *Attempt) createInNeo4j(
 
 	return err
 }
+
+// linkWith Links an Attempt with a Route in Neo4j with the "" label
+func (a *Attempt) linkWith(
+	driver neo4j.Driver,
+	routeId primitive.ObjectID,
+	attemptId primitive.ObjectID,
+) error {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (a:Attempt) WHERE a.id = $aId
+							MATCH (r:Route) WHERE r.id = $rId
+							CREATE (a)-[:TRY_TO_CLIMB]->(r)
+							RETURN r`
+
+		params := map[string]interface{}{
+			"aId": attemptId.String(),
+			"rId": routeId.String(),
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}
