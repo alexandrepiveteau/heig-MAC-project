@@ -59,7 +59,7 @@ func (s *addRouteState) rcvName(update tgbotapi.Update) {
 	s.name = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the difficulty of the route?")
-	msg.ReplyMarkup = keyboards.Grade
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.GradeChoices, 3)
 
 	s.bot.Send(msg)
 	s.stage = addRouteGrade

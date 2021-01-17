@@ -46,7 +46,10 @@ func (s *climbRouteState) init(update tgbotapi.Update) {
 }
 
 func (s *climbRouteState) rcvGym(update tgbotapi.Update) {
-	data := update.Message.Text
+	data, present := utils.GetMessageData(update)
+	if !present {
+		return // ignore update
+	}
 	s.gym = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the name of the route?")
@@ -56,31 +59,49 @@ func (s *climbRouteState) rcvGym(update tgbotapi.Update) {
 }
 
 func (s *climbRouteState) rcvRoute(update tgbotapi.Update) {
-	data := update.Message.Text
+	data, present := utils.GetMessageData(update)
+	if !present {
+		return // ignore update
+	}
 	s.route = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What was your performance?")
-	msg.ReplyMarkup = keyboards.Performance
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(
+		keyboards.PerformanceChoices,
+		keyboards.SingleLine,
+	)
 
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRoutePerformance
 }
 
 func (s *climbRouteState) rcvPerformance(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.PerformanceChoices)...,
+	)
+	if !present {
+		return // ignore update
+	}
 	s.performance = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "How would you grade the route?")
-	msg.ReplyMarkup = keyboards.Grade
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.GradeChoices, 3)
 
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRouteGrade
 }
 
-func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+func (s *climbRouteState) rcvGrade(update tgbotapi.Update) bool {
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.GradeChoices)...,
+	)
+	if !present {
+		return false // ignore update
+	}
 	s.grade = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
@@ -88,6 +109,7 @@ func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Long live the swollen forearms! 💪")
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRouteEnd
+	return true
 }
 
 func (s *climbRouteState) save() {
@@ -143,8 +165,9 @@ func ClimbRouteCmd(
 				state.rcvPerformance(update)
 				break
 			case climbRouteGrade:
-				state.rcvGrade(update)
-				commandTermination <- struct{}{}
+				if finish := state.rcvGrade(update); finish {
+					commandTermination <- struct{}{}
+				}
 				break
 			case climbRouteEnd:
 				break

@@ -1,27 +1,18 @@
 package keyboards
 
-import tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
-
-// The Color keyboard shows the range of color that we support in the app
-var Grade = tgbotapi.NewInlineKeyboardMarkup(
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("5A", "5A"),
-		tgbotapi.NewInlineKeyboardButtonData("5B", "5B"),
-		tgbotapi.NewInlineKeyboardButtonData("5C", "5C"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("6A", "6A"),
-		tgbotapi.NewInlineKeyboardButtonData("6B", "6B"),
-		tgbotapi.NewInlineKeyboardButtonData("6C", "6C"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("7A", "7A"),
-		tgbotapi.NewInlineKeyboardButtonData("7B", "7B"),
-		tgbotapi.NewInlineKeyboardButtonData("7C", "7C"),
-	),
-	tgbotapi.NewInlineKeyboardRow(
-		tgbotapi.NewInlineKeyboardButtonData("8A", "8A"),
-		tgbotapi.NewInlineKeyboardButtonData("8B", "8B"),
-		tgbotapi.NewInlineKeyboardButtonData("8C", "8C"),
-	),
-)
+// The GradeChoices represents the different choices available when a certain
+// grade should be selected.
+var GradeChoices = []Choice{
+	{Action: "5A", Label: "5A"},
+	{Action: "5B", Label: "5B"},
+	{Action: "5C", Label: "5C"},
+	{Action: "6A", Label: "6A"},
+	{Action: "6B", Label: "6B"},
+	{Action: "6C", Label: "6C"},
+	{Action: "7A", Label: "7A"},
+	{Action: "7B", Label: "7B"},
+	{Action: "7C", Label: "7C"},
+	{Action: "8A", Label: "8A"},
+	{Action: "8B", Label: "8B"},
+	{Action: "8C", Label: "8C"},
+}
