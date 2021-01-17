@@ -24,7 +24,7 @@ func StartCmd(
 
 			for _, cmd := range availableCommands {
 				text += fmt.Sprintf(
-					"/`%s`: %s\n",
+					"/%s : %s\n",
 					cmd.Command,
 					cmd.Description,
 				)
