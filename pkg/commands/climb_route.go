@@ -2,6 +2,7 @@ package commands
 
 import (
 	"climb/pkg/types"
+	"climb/pkg/utils"
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -33,6 +34,15 @@ type climbRouteState struct {
 	rating      *int
 }
 
+func (s *climbRouteState) init(update tgbotapi.Update) {
+	msg1 := tgbotapi.NewMessage(utils.GetChatId(&update), "Adding a new attempt to an existing route.")
+	msg2 := tgbotapi.NewMessage(utils.GetChatId(&update), "In which gym are you climbing?")
+
+	s.bot.Send(msg1)
+	s.bot.Send(msg2)
+	s.stage = climbRouteGym
+}
+
 func ClimbRouteCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
@@ -56,6 +66,9 @@ func ClimbRouteCmd(
 			return
 		case update := <-comm.Updates:
 			switch state.stage {
+			case climbRouteInit:
+				state.init(update)
+				break
 			default:
 				msg := tgbotapi.NewMessage(update.Message.Chat.ID, "Sorry I'm lost.")
 				_, _ = bot.Send(msg)
