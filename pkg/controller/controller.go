@@ -71,7 +71,7 @@ func GetController(
 
 	followCmd := types.CommandDefinition{
 		Command:       "follow",
-		Description:   "The follow will allow you to follow another username",
+		Description:   "The follow will allow you to follow another user",
 		Instantiation: controller.instantiateFollowCmd,
 	}
 
