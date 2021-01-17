@@ -51,7 +51,7 @@ func (a *Attempt) Store(
 		return primitive.NewObjectID(), fmt.Errorf("Retrieving route to link: %w", err)
 	}
 
-	err = a.linkWith(neo4jDriver, id, routeId)
+	err = a.linkWith(neo4jDriver, routeId, id)
 	if err != nil {
 		return primitive.NewObjectID(), fmt.Errorf("Linking in Neo4j: %w", err)
 	}
@@ -132,7 +132,7 @@ func (a *Attempt) createInNeo4j(
 	return err
 }
 
-// linkWith Links an Attempt with a Route in Neo4j with the "" label
+// linkWith Links an Attempt with a Route in Neo4j with the "TRY_TO_CLIMB" label
 func (a *Attempt) linkWith(
 	driver neo4j.Driver,
 	routeId primitive.ObjectID,

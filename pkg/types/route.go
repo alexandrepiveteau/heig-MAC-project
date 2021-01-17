@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"errors"
+	"fmt"
 	"log"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -60,6 +61,8 @@ func (r *Route) createInMongo(
 	// Get corresponding gym or create it
 	gymId, err := GymGetId(db, r.Name)
 	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+
 		gym := Gym{
 			Name: r.Gym,
 		}
@@ -95,7 +98,7 @@ func (r *Route) createInMongo(
 
 func (r *Route) createInNeo4j(
 	driver neo4j.Driver,
-	id primitive.ObjectID,
+	routeId primitive.ObjectID,
 ) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -112,7 +115,7 @@ func (r *Route) createInNeo4j(
 							RETURN r`
 
 		params := map[string]interface{}{
-			"id":    id.String(),
+			"id":    routeId.String(),
 			"name":  r.Name,
 			"grade": r.Grade,
 			"holds": r.Holds,

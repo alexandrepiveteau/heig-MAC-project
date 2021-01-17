@@ -51,12 +51,10 @@ func (g *Gym) createInMongo(
 
 	id, err := gymCollection(db).InsertOne(
 		context.TODO(),
-		bson.D{
-			{Key: "name", Value: g.Name},
-		},
+		bson.D{{Key: "name", Value: g.Name}},
 	)
 	if err != nil {
-		log.Println(err.Error())
+		return primitive.NewObjectID(), err
 	}
 
 	// Assert type ObjectID
@@ -100,23 +98,17 @@ func GymGetId(
 ) (primitive.ObjectID, error) {
 
 	// Filter all gyms by name
-	filterCursor, err := gymCollection(db).Find(context.TODO(), bson.M{"name": name})
+	var res bson.M
+	filter := bson.D{{Key: "name", Value: name}}
+	err := gymCollection(db).FindOne(context.TODO(), filter).Decode(&res)
 	if err != nil {
-		log.Fatal(err)
+		return primitive.NewObjectID(), err
 	}
 
-	var gymsFiltered []bson.M
-	if err = filterCursor.All(context.TODO(), &gymsFiltered); err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("%+v\n", res)
 
-	if len(gymsFiltered) == 0 {
-		return primitive.NewObjectID(), errors.New("Empty res")
-	}
-
-	// Cast result to ObjectID
-	id := gymsFiltered[0]["_id"]
-
+	// Assert ObjectID type on _id
+	id := res["_id"]
 	objectId, ok := id.(primitive.ObjectID)
 	if !ok {
 		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
