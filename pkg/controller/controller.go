@@ -87,6 +87,12 @@ func GetController(
 		Instantiation: controller.instantiateUnfollowCmd,
 	}
 
+	profileCmd := types.CommandDefinition{
+		Command:       "profile",
+		Description:   "The profile will allow you to see infos about an user, like best route climbed and follower numbers",
+		Instantiation: controller.instantiateProfileCmd,
+	}
+
 	// Update allowed commands in controller
 	controller.availableCommands = append(
 		controller.availableCommands,
@@ -98,6 +104,7 @@ func GetController(
 		findRouteCmd,
 		followCmd,
 		unfollowCmd,
+		profileCmd,
 	)
 
 	return &controller
@@ -191,7 +198,9 @@ func (c *controller) instantiateFindRouteCmd(commandTermination chan interface{}
 	return comm
 }
 
-func (c *controller) instantiateFollowCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateFollowCmd(
+	commandTermination chan interface{},
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.FollowCmd(
@@ -205,10 +214,28 @@ func (c *controller) instantiateFollowCmd(commandTermination chan interface{}) t
 	return comm
 }
 
-func (c *controller) instantiateUnfollowCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateUnfollowCmd(
+	commandTermination chan interface{},
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.UnfollowCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
+
+	return comm
+}
+
+func (c *controller) instantiateProfileCmd(
+	commandTermination chan interface{},
+) types.Comm {
+	comm := types.InitComm()
+
+	go commands.ProfileCmd(
 		comm,
 		commandTermination,
 		c.bot,

@@ -81,6 +81,7 @@ func FollowCmd(
 				}
 				state.stage = followEnd
 				commandTermination <- struct{}{}
+				break
 			default:
 				msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Sorry I'm lost")
 				bot.Send(msg)

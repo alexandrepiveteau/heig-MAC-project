@@ -9,77 +9,82 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-type unfollowStage int
+type profileStage int
 
 const (
-	unfollowInit unfollowStage = iota
-	unfollowUsername
-	unfollowEnd
+	profileInit profileStage = iota
+	profileUsername
+	profileEnd
 )
 
-type unfollowState struct {
+type profileState struct {
 	bot         *tgbotapi.BotAPI
 	mongodb     *mongo.Database
 	neo4jDriver neo4j.Driver
 
 	// Stage of the progress in the command
-	stage unfollowStage
+	stage profileStage
 
 	// internal data
 	username *string
 }
 
-func (s *unfollowState) init(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username you want to unfollow ?")
+func (s *profileState) init(update tgbotapi.Update) {
+	msg1 := tgbotapi.NewMessage(utils.GetChatId(&update), "Searching user profile.")
+	msg2 := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username of the person you want to check out? Make sure he already contacted me at least once.")
 
-	s.bot.Send(msg)
-	s.stage = unfollowUsername
+	s.bot.Send(msg1)
+	s.bot.Send(msg2)
+	s.stage = profileUsername
 }
 
-func (s *unfollowState) rcvUsername(update tgbotapi.Update) bool {
+func (s *profileState) rcvUsername(update tgbotapi.Update) bool {
 	data, present := utils.GetMessageData(update)
 	if !present {
 		return false
 	}
 
-	// TODO : Do some database stuff.
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), fmt.Sprintf("You're not following @%s anymore !", data))
+	// TODO : Check whether this user exists in the database before moving to the next state.
+	msg := tgbotapi.NewMessage(
+		utils.GetChatId(&update),
+		fmt.Sprintf("@%s never contacted me. Send him this link to get him started: t.me/climbot", data),
+	)
 	s.bot.Send(msg)
 
-	s.stage = unfollowEnd
+	s.stage = profileEnd
 	return true
 }
 
-func UnfollowCmd(
+func ProfileCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
 ) {
-	state := unfollowState{
+	state := profileState{
 		bot:         bot,
 		mongodb:     mongodb,
 		neo4jDriver: neo4jDriver,
 
-		stage: unfollowInit,
+		stage: profileInit,
 	}
 
 	for {
 		select {
 		case <-comm.StopCommand:
-			// TODO : Actually unfollow the user.
+			// TODO : Actually follow the user.
 			return
 		case update := <-comm.Updates:
 			switch state.stage {
-			case unfollowInit:
+			case profileInit:
 				state.init(update)
 				break
-			case unfollowUsername:
+			case profileUsername:
 				if finish := state.rcvUsername(update); !finish {
 					return
 				}
-				state.stage = unfollowEnd
+				state.stage = profileEnd
 				commandTermination <- struct{}{}
 				break
 			default:
