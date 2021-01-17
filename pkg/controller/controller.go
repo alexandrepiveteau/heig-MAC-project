@@ -18,7 +18,7 @@ type Controller interface {
 
 type controller struct {
 	bot         *tgbotapi.BotAPI
-	neo4jDriver *neo4j.Driver
+	neo4jDriver neo4j.Driver
 	mongodb     *mongo.Database
 
 	availableCommands []types.CommandDefinition
@@ -27,7 +27,7 @@ type controller struct {
 // GetController will return a Controller
 func GetController(
 	bot *tgbotapi.BotAPI,
-	neo4jDriver *neo4j.Driver,
+	neo4jDriver neo4j.Driver,
 	mongoClient *mongo.Client,
 ) Controller {
 

@@ -21,7 +21,7 @@ type Route struct {
 // Store will store a route in MongoDB correctly
 func (r *Route) Store(
 	db *mongo.Database,
-	neo4jDriver *neo4j.Driver,
+	neo4jDriver neo4j.Driver,
 ) (primitive.ObjectID, error) {
 	// 1. Store in mongodb
 	id, err := r.createInMongo(db)
@@ -74,5 +74,7 @@ func (r *Route) createInMongo(
 	return objectId, nil
 }
 
-func (r *Route) createInNeo4j(driver *neo4j.Driver) {
+func (r *Route) createInNeo4j(driver neo4j.Driver) {
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
 }

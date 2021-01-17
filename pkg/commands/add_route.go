@@ -27,7 +27,7 @@ const (
 type addRouteState struct {
 	bot         *tgbotapi.BotAPI
 	mongodb     *mongo.Database
-	neo4jDriver *neo4j.Driver
+	neo4jDriver neo4j.Driver
 
 	// Stage of the progress in the command
 	stage addRouteStage
@@ -126,7 +126,7 @@ func AddRouteCmd(
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
-	neo4jDriver *neo4j.Driver,
+	neo4jDriver neo4j.Driver,
 ) {
 
 	state := addRouteState{
