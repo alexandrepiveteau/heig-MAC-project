@@ -47,7 +47,7 @@ func (s *findRouteState) rcvGym(update tgbotapi.Update) {
 	s.gym = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the grade of the route?")
-	msg.ReplyMarkup = keyboards.Grade
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.GradeChoices, 3)
 
 	s.bot.Send(msg)
 	s.stage = findRouteGrade

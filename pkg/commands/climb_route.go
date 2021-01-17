@@ -76,7 +76,10 @@ func (s *climbRouteState) rcvRoute(update tgbotapi.Update) {
 }
 
 func (s *climbRouteState) rcvPerformance(update tgbotapi.Update) {
-	data, present := utils.GetInlineKeyboardData(update, keyboards.GetActions(keyboards.PerformanceChoices)...)
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.PerformanceChoices)...,
+	)
 	if !present {
 		return // ignore update
 	}
@@ -85,14 +88,20 @@ func (s *climbRouteState) rcvPerformance(update tgbotapi.Update) {
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "How would you grade the route?")
-	msg.ReplyMarkup = keyboards.Grade
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.GradeChoices, 3)
 
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRouteGrade
 }
 
-func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+func (s *climbRouteState) rcvGrade(update tgbotapi.Update) bool {
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.GradeChoices)...,
+	)
+	if !present {
+		return false // ignore update
+	}
 	s.grade = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
@@ -100,6 +109,7 @@ func (s *climbRouteState) rcvGrade(update tgbotapi.Update) {
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Long live the swollen forearms! 💪")
 	_, _ = s.bot.Send(msg)
 	s.stage = climbRouteEnd
+	return true
 }
 
 func (s *climbRouteState) save() {
@@ -155,8 +165,9 @@ func ClimbRouteCmd(
 				state.rcvPerformance(update)
 				break
 			case climbRouteGrade:
-				state.rcvGrade(update)
-				commandTermination <- struct{}{}
+				if finish := state.rcvGrade(update); finish {
+					commandTermination <- struct{}{}
+				}
 				break
 			case climbRouteEnd:
 				break
