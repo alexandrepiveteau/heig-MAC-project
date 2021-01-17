@@ -74,8 +74,9 @@
 2. B: Following someone
 3. B: What is the @username the person you want to follow? Make sure he already contacted me at least once.
 4. U: @personUsername
-5A. B: Great! You're now following @personUsername. 
-5B. B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
+5. Two cases:
+   - B: Great! You're now following @personUsername.\
+   - B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
 
 ## See someone's profile
 
@@ -83,12 +84,13 @@
 2. B: Searching user profile
 3. B: What is the @username of the person you want to check out? Make sure he already contacted me at least once.
 4. U: @personUsername
-5A. B: Here is @personUsername's profile:
+5. Two cases:
+   - B: Here is @personUsername's profile:
       - Favourite gym: Le cube
       - Best route climbed: La mer noire (8C)
       - Followers: 868
       - Following: 37
-5B. B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
+   - B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
 
 ## Challenge someone you follow
 
@@ -96,11 +98,13 @@
 2. B: Challing someone you follow
 3. B: Here are the people you follow: Who do you want to challenge? (If you don't see them in this list, enter their @personUsername) (Custom keyboard containing people the user follows)
 4. U: Clicks @personUsername / (Enter @personUsername)
-5A. B: In which gym is the route you want to challenge @personUsername to? (Custom keyboard containing gyms)
-5B. B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
+5. Two cases:
+   - B: In which gym is the route you want to challenge @personUsername to? (Custom keyboard containing gyms)
+   - B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
 6. U: Clicks on the correct gym
-7A. B: What is the route's name? (If you don't see it in this list, enter it's name manually.) (Custom keyboard containing route names (sorted by recent dates?)
+7. B: What is the route's name? (If you don't see it in this list, enter it's name manually.) (Custom keyboard containing route names (sorted by recent dates?)
 8. U: Clicks on the correct route
-9A. B: I don't recognize this route/gym combination. Try checking for spelling mistaked, or add the route to my database using /addRoute.
-9B. B: Great! You challenged @personUsername to climb routeName in GymName! 
+9. Two cases:
+   - B: I don't recognize this route/gym combination. Try checking for spelling mistaked, or add the route to my database using /addRoute.
+   - B: Great! You challenged @personUsername to climb routeName in GymName! 
 10. B -> @personUsernam: @User challenged you to beat the route "routeName" in the gym "gymName". Don't forget to mark the route as climb using /climbRoute once you succeed!
