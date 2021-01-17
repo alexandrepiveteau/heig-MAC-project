@@ -11,11 +11,10 @@ import (
 )
 
 type Route struct {
-	Gym     string
-	Name    string
-	Grade   string
-	Holds   string
-	SetDate string
+	Gym   string
+	Name  string
+	Grade string
+	Holds string
 }
 
 // Store will store a route in MongoDB correctly
@@ -71,7 +70,6 @@ func (r *Route) createInMongo(
 			{Key: "name", Value: r.Name},
 			{Key: "grade", Value: r.Grade},
 			{Key: "holds", Value: r.Holds},
-			{Key: "setDate", Value: r.SetDate},
 		},
 	)
 
@@ -111,7 +109,6 @@ func (r *Route) createInNeo4j(
 			"name":  r.Name,
 			"grade": r.Grade,
 			"holds": r.Holds,
-			//"setDate": r.SetDate, TODO: add date
 		}
 
 		transRes, err := transaction.Run(cypher, params)

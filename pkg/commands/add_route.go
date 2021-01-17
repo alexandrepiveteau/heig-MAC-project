@@ -19,8 +19,6 @@ const (
 	addRouteName
 	addRouteGrade
 	addRouteHolds
-	addRouteDate
-	// TODO: add image of Route
 	addRouteEnd
 )
 
@@ -33,11 +31,10 @@ type addRouteState struct {
 	stage addRouteStage
 
 	// internal data
-	gym     *string
-	name    *string
-	grade   *string
-	holds   *string
-	setDate *string
+	gym   *string
+	name  *string
+	grade *string
+	holds *string
 }
 
 func (s *addRouteState) init(update tgbotapi.Update) {
@@ -87,18 +84,8 @@ func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "When was the route set? _(DD-MM-YYYY)_")
-	msg.ParseMode = tgbotapi.ModeMarkdown
-
-	s.bot.Send(msg)
-	s.stage = addRouteDate
-}
-
-func (s *addRouteState) rcvDate(update tgbotapi.Update) {
-	data := update.Message.Text
-	s.setDate = &data
-
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We've added this route.")
+	msg.ParseMode = tgbotapi.ModeMarkdown
 
 	s.bot.Send(msg)
 	s.stage = addRouteEnd
@@ -106,11 +93,10 @@ func (s *addRouteState) rcvDate(update tgbotapi.Update) {
 
 func (s *addRouteState) save() {
 	route := types.Route{
-		Gym:     *s.gym,
-		Name:    *s.name,
-		Grade:   *s.grade,
-		Holds:   *s.holds,
-		SetDate: *s.setDate,
+		Gym:   *s.gym,
+		Name:  *s.name,
+		Grade: *s.grade,
+		Holds: *s.holds,
 	}
 
 	log.Println("Saving route")
@@ -160,9 +146,6 @@ func AddRouteCmd(
 				break
 			case addRouteHolds:
 				state.rcvHolds(update)
-				break
-			case addRouteDate:
-				state.rcvDate(update)
 				commandTermination <- struct{}{}
 				break
 			case addRouteEnd:
