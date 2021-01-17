@@ -4,8 +4,11 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type addRouteStage int
@@ -16,23 +19,22 @@ const (
 	addRouteName
 	addRouteGrade
 	addRouteHolds
-	addRouteDate
-	// TODO: add image of Route
 	addRouteEnd
 )
 
 type addRouteState struct {
-	bot *tgbotapi.BotAPI
+	bot         *tgbotapi.BotAPI
+	mongodb     *mongo.Database
+	neo4jDriver neo4j.Driver
 
 	// Stage of the progress in the command
 	stage addRouteStage
 
 	// internal data
-	gym     *string
-	name    *string
-	grade   *string
-	holds   *string
-	setDate *string
+	gym   *string
+	name  *string
+	grade *string
+	holds *string
 }
 
 func (s *addRouteState) init(update tgbotapi.Update) {
@@ -82,38 +84,50 @@ func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "When was the route set? _(DD-MM-YYYY)_")
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We've added this route.")
 	msg.ParseMode = tgbotapi.ModeMarkdown
 
 	s.bot.Send(msg)
-	s.stage = addRouteDate
+	s.stage = addRouteEnd
 }
 
-func (s *addRouteState) rcvDate(update tgbotapi.Update) {
-	data := update.Message.Text
-	s.setDate = &data
+func (s *addRouteState) save() {
+	route := types.Route{
+		Gym:   *s.gym,
+		Name:  *s.name,
+		Grade: *s.grade,
+		Holds: *s.holds,
+	}
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "Thanks! We've added this route.")
+	log.Println("Saving route")
 
-	s.bot.Send(msg)
-	s.stage = addRouteEnd
+	_, err := route.Store(s.mongodb, s.neo4jDriver)
+	if err != nil {
+		log.Printf("Error saving Route: %s\n", err.Error())
+	}
 }
 
 func AddRouteCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
 	bot *tgbotapi.BotAPI,
+	mongodb *mongo.Database,
+	neo4jDriver neo4j.Driver,
 ) {
 
 	state := addRouteState{
-		bot:   bot,
+		bot:         bot,
+		mongodb:     mongodb,
+		neo4jDriver: neo4jDriver,
+
 		stage: addRouteInit,
 	}
 
 	for {
 		select {
 		case <-comm.StopCommand:
-			// For now, simply quit. Later, we'll want to add all the information in the db
+			// Save data in db, then quit
+			state.save()
 			return
 
 		case update := <-comm.Updates:
@@ -132,9 +146,6 @@ func AddRouteCmd(
 				break
 			case addRouteHolds:
 				state.rcvHolds(update)
-				break
-			case addRouteDate:
-				state.rcvDate(update)
 				commandTermination <- struct{}{}
 				break
 			case addRouteEnd:

@@ -57,7 +57,7 @@ func main() {
 	// Start controller
 	controller := controller.GetController(
 		bot,
-		&neo4jDriver,
+		neo4jDriver,
 		mongoClient,
 	)
 

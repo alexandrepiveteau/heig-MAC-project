@@ -11,14 +11,15 @@ import (
 
 type Controller interface {
 	Bot() *tgbotapi.BotAPI
+	MongoDB() *mongo.Database
 
 	AvailableCommands() []types.CommandDefinition
 }
 
 type controller struct {
 	bot         *tgbotapi.BotAPI
-	neo4jDriver *neo4j.Driver
-	mongoClient *mongo.Client
+	neo4jDriver neo4j.Driver
+	mongodb     *mongo.Database
 
 	availableCommands []types.CommandDefinition
 }
@@ -26,7 +27,7 @@ type controller struct {
 // GetController will return a Controller
 func GetController(
 	bot *tgbotapi.BotAPI,
-	neo4jDriver *neo4j.Driver,
+	neo4jDriver neo4j.Driver,
 	mongoClient *mongo.Client,
 ) Controller {
 
@@ -34,7 +35,7 @@ func GetController(
 	controller := controller{
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
-		mongoClient: mongoClient,
+		mongodb:     mongoClient.Database("db"),
 	}
 
 	// Define allowd commands
@@ -69,12 +70,16 @@ func GetController(
 
 // Controller functions
 
-func (c *controller) AvailableCommands() []types.CommandDefinition {
-	return c.availableCommands
-}
-
 func (c *controller) Bot() *tgbotapi.BotAPI {
 	return c.bot
+}
+
+func (c *controller) MongoDB() *mongo.Database {
+	return c.mongodb
+}
+
+func (c *controller) AvailableCommands() []types.CommandDefinition {
+	return c.availableCommands
 }
 
 // Private functions
@@ -98,7 +103,13 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{}) types.Comm {
 	comm := types.InitComm()
 
-	go commands.AddRouteCmd(comm, commandTermination, c.bot)
+	go commands.AddRouteCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
 
 	return comm
 }
