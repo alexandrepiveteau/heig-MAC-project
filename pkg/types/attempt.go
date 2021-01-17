@@ -67,3 +67,36 @@ func (a *Attempt) createInMongo(
 
 	return objectId, nil
 }
+
+func (a *Attempt) createInNeo4j(
+	driver neo4j.Driver,
+	id primitive.ObjectID,
+) error {
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `CREATE (a:Attempt)
+							SET a = {
+							  id: $id,
+								proposedGrade: $proposedGrade,
+								performance: $performance,
+								}
+							RETURN a`
+
+		params := map[string]interface{}{
+			"id":            id.String(),
+			"proposedGrade": a.ProposedGrade,
+			"performance":   a.Performance,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}
