@@ -15,3 +15,13 @@ var Color = tgbotapi.NewInlineKeyboardMarkup(
 		tgbotapi.NewInlineKeyboardButtonData("Gray", "gray"),
 	),
 )
+
+// The Color keyboard shows the range of color that we support in the app
+var ColorChoices = []Choice{
+	{Action: "red", Label: "Red"},
+	{Action: "green", Label: "Green"},
+	{Action: "blue", Label: "Blue"},
+	{Action: "yellow", Label: "Yellow"},
+	{Action: "orange", Label: "Orange"},
+	{Action: "gray", Label: "Gray"},
+}

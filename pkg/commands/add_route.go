@@ -45,7 +45,11 @@ func (s *addRouteState) init(update tgbotapi.Update) {
 }
 
 func (s *addRouteState) rcvGym(update tgbotapi.Update) {
-	data := update.Message.Text
+	data, present := utils.GetMessageData(update)
+	if !present {
+		return // ignore update
+	}
+
 	s.gym = &data
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the name of the route?")
@@ -55,10 +59,14 @@ func (s *addRouteState) rcvGym(update tgbotapi.Update) {
 }
 
 func (s *addRouteState) rcvName(update tgbotapi.Update) {
-	data := update.Message.Text
+	data, present := utils.GetMessageData(update)
+	if !present {
+		return // ignore update
+	}
+
 	s.name = &data
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the difficulty of the route?")
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the grade of the route?")
 	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.GradeChoices, 3)
 
 	s.bot.Send(msg)
@@ -66,20 +74,35 @@ func (s *addRouteState) rcvName(update tgbotapi.Update) {
 }
 
 func (s *addRouteState) rcvGrade(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.GradeChoices)...,
+	)
+
+	if !present {
+		return // ignore update
+	}
+
 	s.grade = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What colors are the holds?")
-	msg.ReplyMarkup = keyboards.Color
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(keyboards.ColorChoices, 3)
 
 	s.bot.Send(msg)
 	s.stage = addRouteHolds
 }
 
-func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
-	data := update.CallbackQuery.Data
+func (s *addRouteState) rcvHolds(update tgbotapi.Update) bool {
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(keyboards.ColorChoices)...,
+	)
+	if !present {
+		return false // ignore update
+	}
+
 	s.holds = &data
 
 	utils.RemoveInlineKeyboard(s.bot, &update)
@@ -89,6 +112,7 @@ func (s *addRouteState) rcvHolds(update tgbotapi.Update) {
 
 	s.bot.Send(msg)
 	s.stage = addRouteEnd
+	return true
 }
 
 func (s *addRouteState) save() {
@@ -145,8 +169,9 @@ func AddRouteCmd(
 				state.rcvGrade(update)
 				break
 			case addRouteHolds:
-				state.rcvHolds(update)
-				commandTermination <- struct{}{}
+				if finish := state.rcvHolds(update); finish {
+					commandTermination <- struct{}{}
+				}
 				break
 			case addRouteEnd:
 				break
