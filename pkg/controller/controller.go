@@ -57,12 +57,19 @@ func GetController(
 		Instantiation: controller.instantiateAddRouteCmd,
 	}
 
+	findRouteCmd := types.CommandDefinition{
+		Command:       "findRoute",
+		Description:   "The findRoute will allow you to find the name of routes",
+		Instantiation: controller.instantiateFindRouteCmd,
+	}
+
 	// Update allowed commands in controller
 	controller.availableCommands = append(
 		controller.availableCommands,
 		startCmd,
 		colorCmd,
 		addRouteCmd,
+		findRouteCmd,
 	)
 
 	return &controller
@@ -104,6 +111,20 @@ func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{})
 	comm := types.InitComm()
 
 	go commands.AddRouteCmd(
+		comm,
+		commandTermination,
+		c.bot,
+		c.mongodb,
+		c.neo4jDriver,
+	)
+
+	return comm
+}
+
+func (c *controller) instantiateFindRouteCmd(commandTermination chan interface{}) types.Comm {
+	comm := types.InitComm()
+
+	go commands.FindRouteCmd(
 		comm,
 		commandTermination,
 		c.bot,
