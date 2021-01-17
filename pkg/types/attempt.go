@@ -112,7 +112,7 @@ func (a *Attempt) createInNeo4j(
 							SET a = {
 							  id: $id,
 								proposedGrade: $proposedGrade,
-								performance: $performance,
+								performance: $performance
 								}
 							RETURN a`
 
