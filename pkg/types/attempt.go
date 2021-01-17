@@ -3,6 +3,7 @@ package types
 import (
 	"context"
 	"errors"
+	"fmt"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/bson"
@@ -30,29 +31,29 @@ func (a *Attempt) Store(
 	// 1. Store in mongodb
 	id, err := a.createInMongo(db, neo4jDriver)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Creating in mongodb: %w", err)
 	}
 
 	// 2. Create in Neo4j
 	err = a.createInNeo4j(neo4jDriver, id)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Creating in Neo4j: %w", err)
 	}
 
 	// 3. Link with Route
 	gymId, err := GymGetId(db, a.GymName)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Retrieving gym to link: %w", err)
 	}
 
 	routeId, err := RouteGetId(db, gymId, a.RouteName)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Retrieving route to link: %w", err)
 	}
 
 	err = a.linkWith(neo4jDriver, id, routeId)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Linking in Neo4j: %w", err)
 	}
 
 	// Return mongo's id
