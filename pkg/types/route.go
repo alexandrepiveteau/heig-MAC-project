@@ -35,11 +35,11 @@ func (r *Route) Store(
 	id, err := db.Collection("routes").InsertOne(
 		context.TODO(),
 		bson.D{
-			{"gym", gymId},
-			{"name", r.Name},
-			{"grade", r.Grade},
-			{"holds", r.Holds},
-			{"setDate", r.SetDate},
+			{Key: "gym", Value: gymId},
+			{Key: "name", Value: r.Name},
+			{Key: "grade", Value: r.Grade},
+			{Key: "holds", Value: r.Holds},
+			{Key: "setDate", Value: r.SetDate},
 		},
 	)
 

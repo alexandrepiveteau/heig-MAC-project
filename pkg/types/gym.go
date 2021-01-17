@@ -30,7 +30,7 @@ func (g *Gym) Store(
 	id, err := gymCollection(db).InsertOne(
 		context.TODO(),
 		bson.D{
-			{"name", g.Name},
+			{Key: "name", Value: g.Name},
 		},
 	)
 	if err != nil {
