@@ -7,8 +7,8 @@
     * add an attempt
     * add a new route
     * find a route
-    * add a friend
-    * challenge your friends
+    * follow someone
+    * challenge someone you follow
     * see someone's profile
 
 ## Someone wants to climb a route
@@ -68,3 +68,24 @@
 13. U: clicks
 14. B: shows route profile
 
+## Follow someone
+
+1. U: clicks on "follow"
+2. B: Following someone
+3. B: What is the @username the person you want to follow? Make sure he already contacted me at least once.
+4. U: @personUsername
+5A. B: Great! You're now following @personUsername. 
+5B. B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
+
+## See someone's profile
+
+1. U: clicks on "search user profile"
+2. B: Searching user profile
+3. B: What is the @username of the person you want to check out? Make sure he already contacted me at least once.
+4. U: @personUsername
+5A. B: Here is @personUsername's profile:
+      - Favourite gym: Le cube
+      - Best route climbed: La mer noire (8C)
+      - Followers: 868
+      - Following: 37
+5B. B: @personUsername never contacted me. Send him this link to get him started: t.me/climbot
