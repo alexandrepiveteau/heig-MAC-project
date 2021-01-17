@@ -4,7 +4,6 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
-	"context"
 	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
@@ -114,12 +113,7 @@ func (s *addRouteState) save() {
 
 	log.Println("Saving route")
 
-	routes := s.mongodb.Collection("routes")
-	_, err := routes.InsertOne(context.TODO(), route)
-	if err != nil {
-		log.Println(err.Error())
-	}
-
+	route.Store(s.mongodb)
 }
 
 func AddRouteCmd(
