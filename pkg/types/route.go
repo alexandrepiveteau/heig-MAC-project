@@ -187,7 +187,7 @@ func RouteGetId(
 	}
 
 	if len(routesFiltered) == 0 {
-		return primitive.NewObjectID(), errors.New("Empty res")
+		return primitive.NewObjectID(), errors.New("Empty result, no route found")
 	}
 
 	// Cast result to ObjectID

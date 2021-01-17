@@ -67,12 +67,12 @@ func (a *Attempt) createInMongo(
 
 	gymId, err := GymGetId(db, a.GymName)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Retrieving gymId: %w", err)
 	}
 
 	routeId, err := RouteGetId(db, gymId, a.RouteName)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Retrieving routeId: %w", err)
 	}
 
 	// Add route
@@ -87,7 +87,7 @@ func (a *Attempt) createInMongo(
 	)
 
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return primitive.NewObjectID(), fmt.Errorf("Inserting route: %w", err)
 	}
 
 	// Assert type ObjectID
