@@ -172,9 +172,9 @@ func RouteGetId(
 	// Filter all routes by name and gymId
 	filterCursor, err := routeCollection(db).Find(
 		context.TODO(),
-		bson.M{
-			"name": name,
-			"gym":  gymId.String(),
+		bson.D{
+			{Key: "gym", Value: gymId},
+			{Key: "name", Value: name},
 		},
 	)
 	if err != nil {
