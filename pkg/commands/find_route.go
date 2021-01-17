@@ -4,6 +4,7 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -134,6 +135,12 @@ func FindRouteCmd(
 					commandTermination <- struct{}{}
 				}
 				// TODO: Return found routes to user
+				types.RouteFind(
+					state.mongodb,
+					*state.gym,
+					*state.grade,
+					*state.holds,
+				)
 				break
 			case findRouteEnd:
 				break
