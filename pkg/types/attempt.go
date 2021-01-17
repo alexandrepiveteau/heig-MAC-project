@@ -26,53 +26,53 @@ type Attempt struct {
 func (a *Attempt) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// 1. Store in mongodb
 	id, err := a.createInMongo(db, neo4jDriver)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Creating in mongodb: %w", err)
+		return "", fmt.Errorf("Creating in mongodb: %w", err)
 	}
 
 	// 2. Create in Neo4j
 	err = a.createInNeo4j(neo4jDriver, id)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Creating in Neo4j: %w", err)
+		return "", fmt.Errorf("Creating in Neo4j: %w", err)
 	}
 
 	// 3. Link with Route
 	gymId, err := GymGetId(db, a.GymName)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Retrieving gym to link: %w", err)
+		return "", fmt.Errorf("Retrieving gym to link: %w", err)
 	}
 
 	routeId, err := RouteGetId(db, gymId, a.RouteName)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Retrieving route to link: %w", err)
+		return "", fmt.Errorf("Retrieving route to link: %w", err)
 	}
 
 	err = a.linkWith(neo4jDriver, routeId, id)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Linking in Neo4j: %w", err)
+		return "", fmt.Errorf("Linking in Neo4j: %w", err)
 	}
 
 	// Return mongo's id
-	return id, nil
+	return id.Hex(), nil
 }
 
 func (a *Attempt) createInMongo(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	gymId, err := GymGetId(db, a.GymName)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Retrieving gymId: %w", err)
+		return "", fmt.Errorf("Retrieving gymId: %w", err)
 	}
 
 	routeId, err := RouteGetId(db, gymId, a.RouteName)
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Retrieving routeId: %w", err)
+		return "", fmt.Errorf("Retrieving routeId: %w", err)
 	}
 
 	// Add route
@@ -87,21 +87,21 @@ func (a *Attempt) createInMongo(
 	)
 
 	if err != nil {
-		return primitive.NewObjectID(), fmt.Errorf("Inserting route: %w", err)
+		return "", fmt.Errorf("Inserting route: %w", err)
 	}
 
 	// Assert type ObjectID
 	objectId, ok := id.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
 
 func (a *Attempt) createInNeo4j(
 	driver neo4j.Driver,
-	id primitive.ObjectID,
+	attemptId string,
 ) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -117,7 +117,7 @@ func (a *Attempt) createInNeo4j(
 							RETURN a`
 
 		params := map[string]interface{}{
-			"id":            id.String(),
+			"id":            attemptId,
 			"proposedGrade": a.ProposedGrade,
 			"performance":   a.Performance,
 		}
@@ -135,8 +135,8 @@ func (a *Attempt) createInNeo4j(
 // linkWith Links an Attempt with a Route in Neo4j with the "TRY_TO_CLIMB" label
 func (a *Attempt) linkWith(
 	driver neo4j.Driver,
-	routeId primitive.ObjectID,
-	attemptId primitive.ObjectID,
+	routeId string,
+	attemptId string,
 ) error {
 
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -150,8 +150,8 @@ func (a *Attempt) linkWith(
 							RETURN r`
 
 		params := map[string]interface{}{
-			"aId": attemptId.String(),
-			"rId": routeId.String(),
+			"aId": attemptId,
+			"rId": routeId,
 		}
 
 		transRes, err := transaction.Run(cypher, params)
