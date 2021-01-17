@@ -24,7 +24,7 @@ func (r *Route) Store(
 	neo4jDriver neo4j.Driver,
 ) (primitive.ObjectID, error) {
 	// 1. Store in mongodb
-	id, err := r.createInMongo(db)
+	id, err := r.createInMongo(db, neo4jDriver)
 	if err != nil {
 		return primitive.NewObjectID(), err
 	}
@@ -38,6 +38,7 @@ func (r *Route) Store(
 
 func (r *Route) createInMongo(
 	db *mongo.Database,
+	neo4jDriver neo4j.Driver,
 ) (primitive.ObjectID, error) {
 
 	// Get corresponding gym or create it
@@ -46,7 +47,10 @@ func (r *Route) createInMongo(
 		gym := Gym{
 			Name: r.Gym,
 		}
-		gymId, err = gym.Store(db)
+		gymId, err = gym.Store(db, neo4jDriver)
+		if err != nil {
+			return primitive.ObjectID{}, err
+		}
 	}
 
 	// Add route

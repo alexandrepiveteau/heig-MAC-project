@@ -5,6 +5,7 @@ import (
 	"errors"
 	"log"
 
+	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/bson/primitive"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +26,27 @@ type Gym struct {
 // should be made by the caller
 func (g *Gym) Store(
 	db *mongo.Database,
+	neo4jDriver neo4j.Driver,
+) (primitive.ObjectID, error) {
+
+	// 1. Create in MongoDB
+	id, err := g.createInMongo(db)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// 2. Create in Neo4j
+	err = g.createInNeo4j(neo4jDriver)
+	if err != nil {
+		return primitive.NewObjectID(), err
+	}
+
+	// Return mongo's id
+	return id, nil
+}
+
+func (g *Gym) createInMongo(
+	db *mongo.Database,
 ) (primitive.ObjectID, error) {
 
 	id, err := gymCollection(db).InsertOne(
@@ -44,6 +66,27 @@ func (g *Gym) Store(
 	}
 
 	return objectId, nil
+}
+
+func (g *Gym) createInNeo4j(driver neo4j.Driver) error {
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := "CREATE (g:Gym) SET g.name = $name RETURN g"
+		params := map[string]interface{}{
+			"name": g.Name,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
 }
 
 // GymGetId returns the id of a Gym named name if it exists or an error
