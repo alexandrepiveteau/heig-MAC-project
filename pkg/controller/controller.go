@@ -11,6 +11,7 @@ import (
 
 type Controller interface {
 	Bot() *tgbotapi.BotAPI
+	MongoDB() *mongo.Database
 
 	AvailableCommands() []types.CommandDefinition
 }
@@ -18,7 +19,7 @@ type Controller interface {
 type controller struct {
 	bot         *tgbotapi.BotAPI
 	neo4jDriver *neo4j.Driver
-	mongoClient *mongo.Client
+	mongodb     *mongo.Database
 
 	availableCommands []types.CommandDefinition
 }
@@ -34,7 +35,7 @@ func GetController(
 	controller := controller{
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
-		mongoClient: mongoClient,
+		mongodb:     mongoClient.Database("db"),
 	}
 
 	// Define allowd commands
@@ -69,12 +70,16 @@ func GetController(
 
 // Controller functions
 
-func (c *controller) AvailableCommands() []types.CommandDefinition {
-	return c.availableCommands
-}
-
 func (c *controller) Bot() *tgbotapi.BotAPI {
 	return c.bot
+}
+
+func (c *controller) MongoDB() *mongo.Database {
+	return c.mongodb
+}
+
+func (c *controller) AvailableCommands() []types.CommandDefinition {
+	return c.availableCommands
 }
 
 // Private functions
