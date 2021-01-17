@@ -10,6 +10,11 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
+// gymCollection gives access to the gym collection in the database
+func routeCollection(db *mongo.Database) *mongo.Collection {
+	return db.Collection("routes")
+}
+
 type Route struct {
 	Gym   string
 	Name  string
@@ -63,7 +68,7 @@ func (r *Route) createInMongo(
 	}
 
 	// Add route
-	id, err := db.Collection("routes").InsertOne(
+	id, err := routeCollection(db).InsertOne(
 		context.TODO(),
 		bson.D{
 			{Key: "gym", Value: gymId},
