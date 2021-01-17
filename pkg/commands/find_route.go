@@ -4,6 +4,7 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
+	"fmt"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -28,6 +29,8 @@ type findRouteState struct {
 	// Stage of the progress in the command
 	stage findRouteStage
 
+	chat int64
+
 	// internal data
 	gym   *string
 	grade *string
@@ -35,6 +38,9 @@ type findRouteState struct {
 }
 
 func (s *findRouteState) init(update tgbotapi.Update) {
+	// store chat id for future needs
+	s.chat = utils.GetChatId(&update)
+
 	msg1 := tgbotapi.NewMessage(utils.GetChatId(&update), "Searching for routes.")
 	msg2 := tgbotapi.NewMessage(utils.GetChatId(&update), "In which gym do you want to find the route?")
 
@@ -99,6 +105,32 @@ func (s *findRouteState) rcvHolds(update tgbotapi.Update) bool {
 	return true
 }
 
+func (s *findRouteState) sendFoundRoutes() {
+	routes, err := types.RouteFind(
+		s.mongodb,
+		*s.gym,
+		*s.grade,
+		*s.holds,
+	)
+
+	var text string
+
+	if err != nil {
+		text = "Sorry, could not get the desired routes."
+	} else if len(routes) == 0 {
+		text = "No corresponding routes were found."
+	} else {
+		text = "_Found routes_:\n"
+		for i, r := range routes {
+			text += fmt.Sprintf("(%d) %s\n", i+1, r.Name)
+		}
+	}
+
+	msg := tgbotapi.NewMessage(s.chat, text)
+	msg.ParseMode = tgbotapi.ModeMarkdown
+	s.bot.Send(msg)
+}
+
 func FindRouteCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
@@ -134,13 +166,8 @@ func FindRouteCmd(
 				if finish := state.rcvHolds(update); finish {
 					commandTermination <- struct{}{}
 				}
-				// TODO: Return found routes to user
-				types.RouteFind(
-					state.mongodb,
-					*state.gym,
-					*state.grade,
-					*state.holds,
-				)
+
+				state.sendFoundRoutes()
 				break
 			case findRouteEnd:
 				break
