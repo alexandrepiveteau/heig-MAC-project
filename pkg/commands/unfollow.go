@@ -89,4 +89,3 @@ func UnfollowCmd(
 		}
 	}
 }
-
