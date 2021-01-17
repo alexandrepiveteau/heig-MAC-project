@@ -3,6 +3,8 @@ package types
 import (
 	"context"
 	"errors"
+	"fmt"
+	"log"
 
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/bson"
@@ -10,7 +12,7 @@ import (
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
-// gymCollection gives access to the gym collection in the database
+// routeCollection gives access to the gym collection in the database
 func routeCollection(db *mongo.Database) *mongo.Collection {
 	return db.Collection("routes")
 }
@@ -26,23 +28,24 @@ type Route struct {
 func (r *Route) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
+
 	// 1. Store in mongodb
 	id, err := r.createInMongo(db, neo4jDriver)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// 2. Create in Neo4j
 	err = r.createInNeo4j(neo4jDriver, id)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// 3. Link with Gym
 	gymId, err := GymGetId(db, r.Gym)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 	err = r.linkWith(neo4jDriver, id, gymId)
 
@@ -53,17 +56,19 @@ func (r *Route) Store(
 func (r *Route) createInMongo(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// Get corresponding gym or create it
-	gymId, err := GymGetId(db, r.Name)
+	gymId, err := GymGetId(db, r.Gym)
 	if err != nil {
+		fmt.Printf("%s\n", err.Error())
+
 		gym := Gym{
 			Name: r.Gym,
 		}
 		gymId, err = gym.Store(db, neo4jDriver)
 		if err != nil {
-			return primitive.ObjectID{}, err
+			return "", err
 		}
 	}
 
@@ -79,21 +84,21 @@ func (r *Route) createInMongo(
 	)
 
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// Assert type ObjectID
 	objectId, ok := id.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
 
 func (r *Route) createInNeo4j(
 	driver neo4j.Driver,
-	id primitive.ObjectID,
+	routeId string,
 ) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -110,7 +115,7 @@ func (r *Route) createInNeo4j(
 							RETURN r`
 
 		params := map[string]interface{}{
-			"id":    id.String(),
+			"id":    routeId,
 			"name":  r.Name,
 			"grade": r.Grade,
 			"holds": r.Holds,
@@ -128,8 +133,8 @@ func (r *Route) createInNeo4j(
 
 func (r *Route) linkWith(
 	driver neo4j.Driver,
-	routeId primitive.ObjectID,
-	gymId primitive.ObjectID,
+	routeId string,
+	gymId string,
 ) error {
 
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
@@ -143,8 +148,8 @@ func (r *Route) linkWith(
 							RETURN r`
 
 		params := map[string]interface{}{
-			"rId": routeId.String(),
-			"gId": gymId.String(),
+			"rId": routeId,
+			"gId": gymId,
 		}
 
 		transRes, err := transaction.Run(cypher, params)
@@ -155,4 +160,46 @@ func (r *Route) linkWith(
 	})
 
 	return err
+}
+
+// RouteGetId returns the id of a Route named name if it exists or an error
+//
+// gymId should be the id of the gym in which the route is
+// name is the name of the route
+func RouteGetId(
+	db *mongo.Database,
+	gymId string,
+	name string,
+) (string, error) {
+
+	// Filter all routes by name and gymId
+	filterCursor, err := routeCollection(db).Find(
+		context.TODO(),
+		bson.D{
+			{Key: "gym", Value: gymId},
+			{Key: "name", Value: name},
+		},
+	)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	var routesFiltered []bson.M
+	if err = filterCursor.All(context.TODO(), &routesFiltered); err != nil {
+		log.Fatal(err)
+	}
+
+	if len(routesFiltered) == 0 {
+		return "", errors.New("Empty result, no route found")
+	}
+
+	// Cast result to ObjectID
+	id := routesFiltered[0]["_id"]
+
+	objectId, ok := id.(primitive.ObjectID)
+	if !ok {
+		return "", errors.New("ObjectID was not found.")
+	}
+
+	return objectId.Hex(), nil
 }

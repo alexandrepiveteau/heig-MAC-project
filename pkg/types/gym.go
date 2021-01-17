@@ -27,18 +27,18 @@ type Gym struct {
 func (g *Gym) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// 1. Create in MongoDB
 	id, err := g.createInMongo(db)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// 2. Create in Neo4j
 	err = g.createInNeo4j(neo4jDriver, id)
 	if err != nil {
-		return primitive.NewObjectID(), err
+		return "", err
 	}
 
 	// Return mongo's id
@@ -47,30 +47,28 @@ func (g *Gym) Store(
 
 func (g *Gym) createInMongo(
 	db *mongo.Database,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	id, err := gymCollection(db).InsertOne(
 		context.TODO(),
-		bson.D{
-			{Key: "name", Value: g.Name},
-		},
+		bson.D{{Key: "name", Value: g.Name}},
 	)
 	if err != nil {
-		log.Println(err.Error())
+		return "", err
 	}
 
 	// Assert type ObjectID
 	objectId, ok := id.InsertedID.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
 
 func (g *Gym) createInNeo4j(
 	driver neo4j.Driver,
-	id primitive.ObjectID,
+	gymId string,
 ) error {
 	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
 	defer session.Close()
@@ -79,7 +77,7 @@ func (g *Gym) createInNeo4j(
 
 		cypher := "CREATE (g:Gym) SET g = {name: $name, id: $id} RETURN g"
 		params := map[string]interface{}{
-			"id":   id.String(),
+			"id":   gymId,
 			"name": g.Name,
 		}
 
@@ -97,30 +95,24 @@ func (g *Gym) createInNeo4j(
 func GymGetId(
 	db *mongo.Database,
 	name string,
-) (primitive.ObjectID, error) {
+) (string, error) {
 
 	// Filter all gyms by name
-	filterCursor, err := gymCollection(db).Find(context.TODO(), bson.M{"name": name})
+	var res bson.M
+	filter := bson.D{{Key: "name", Value: name}}
+	err := gymCollection(db).FindOne(context.TODO(), filter).Decode(&res)
 	if err != nil {
-		log.Fatal(err)
+		return "", err
 	}
 
-	var gymsFiltered []bson.M
-	if err = filterCursor.All(context.TODO(), &gymsFiltered); err != nil {
-		log.Fatal(err)
-	}
+	log.Printf("%+v\n", res)
 
-	if len(gymsFiltered) == 0 {
-		return primitive.NewObjectID(), errors.New("Empty res")
-	}
-
-	// Cast result to ObjectID
-	id := gymsFiltered[0]["_id"]
-
+	// Assert ObjectID type on _id
+	id := res["_id"]
 	objectId, ok := id.(primitive.ObjectID)
 	if !ok {
-		return primitive.NewObjectID(), errors.New("ObjectID was not found.")
+		return "", errors.New("ObjectID was not found.")
 	}
 
-	return objectId, nil
+	return objectId.Hex(), nil
 }
