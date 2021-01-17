@@ -4,6 +4,8 @@ import (
 	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
+	"context"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -101,6 +103,25 @@ func (s *addRouteState) rcvDate(update tgbotapi.Update) {
 	s.stage = addRouteEnd
 }
 
+func (s *addRouteState) save() {
+	route := types.Route{
+		Gym:     *s.gym,
+		Name:    *s.name,
+		Grade:   *s.grade,
+		Holds:   *s.holds,
+		SetDate: *s.setDate,
+	}
+
+	log.Println("Saving route")
+
+	routes := s.mongodb.Collection("routes")
+	_, err := routes.InsertOne(context.TODO(), route)
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+}
+
 func AddRouteCmd(
 	comm types.Comm,
 	commandTermination chan interface{},
@@ -118,7 +139,8 @@ func AddRouteCmd(
 	for {
 		select {
 		case <-comm.StopCommand:
-			// For now, simply quit. Later, we'll want to add all the information in the db
+			// Save data in db, then quit
+			state.save()
 			return
 
 		case update := <-comm.Updates:
