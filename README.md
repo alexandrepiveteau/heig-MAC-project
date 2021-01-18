@@ -114,4 +114,11 @@ Neo4J nous permet de stocker les relations entre les gyms, les voies, les utilis
     - `performance`, le résultat associé à la tentative (`flashed`, `succeeded` ou `failed`);
     - `rating`, la note attribuée par l'utilisateur.
 
+Ces différents types de noeuds sont aussi liés par certaines relations :
+
++ `Attempt->[TRY_TO_CLIMB]->Route`, quand une tentative est effectuée sur une route particulière. Cette relation est créée lors de l'ajout de la tentative à la base de données;
++ `Route->[IS_IN]->Gym`, quand une route est créée dans une salle particulière; Cette relation est créée lors de l'ajout de la route;
++ `User->[CREATED]->Route`, quand une route est créée par un utilisateur spécifique. Cette relation est créée lors de l'ajout de la route; et
++ `User->[FOLLOWS]->User`, quand un utilisateur suit un autre utilisateur.
+
 ## Requêtes effectuées
