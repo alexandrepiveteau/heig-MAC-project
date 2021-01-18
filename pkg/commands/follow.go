@@ -4,6 +4,7 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +26,9 @@ type followState struct {
 	// Stage of the progress in the command
 	stage followStage
 
+	user         types.UserData
+	currentUsers map[string]types.UserData
+
 	// internal data
 	username *string
 }
@@ -42,8 +46,16 @@ func (s *followState) rcvUsername(update tgbotapi.Update) bool {
 		return false
 	}
 
-	// TODO : Check whether this user exists in the database before moving to the next state.
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), fmt.Sprintf("You're now following @%s !", data))
+	var text string
+	_, prs := s.currentUsers[data]
+	if !prs {
+		text = "The requested user does not exist. Ask them to join!"
+	} else {
+		s.username = &data
+		text = fmt.Sprintf("You're now following @%s !", data)
+	}
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), text)
 	s.bot.Send(msg)
 
 	s.stage = followEnd
@@ -56,6 +68,8 @@ func FollowCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
+	currentUsers map[string]types.UserData,
 ) {
 	state := followState{
 		bot:         bot,
@@ -63,6 +77,9 @@ func FollowCmd(
 		neo4jDriver: neo4jDriver,
 
 		stage: followInit,
+
+		user:         user,
+		currentUsers: currentUsers,
 	}
 
 	for {

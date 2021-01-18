@@ -168,7 +168,7 @@ func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Upd
 func (c *controller) instantiateStartCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -180,7 +180,7 @@ func (c *controller) instantiateStartCmd(
 func (c *controller) instantiateColorCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -192,7 +192,7 @@ func (c *controller) instantiateColorCmd(
 func (c *controller) instantiateChallengeCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -210,7 +210,7 @@ func (c *controller) instantiateChallengeCmd(
 func (c *controller) instantiateAddRouteCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -229,7 +229,7 @@ func (c *controller) instantiateAddRouteCmd(
 func (c *controller) instantiateClimbRouteCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -248,7 +248,7 @@ func (c *controller) instantiateClimbRouteCmd(
 func (c *controller) instantiateFindRouteCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -266,7 +266,7 @@ func (c *controller) instantiateFindRouteCmd(
 func (c *controller) instantiateFollowCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -276,6 +276,8 @@ func (c *controller) instantiateFollowCmd(
 		c.bot,
 		c.mongodb,
 		c.neo4jDriver,
+		userdata,
+		currentUsers,
 	)
 
 	return comm
@@ -284,7 +286,7 @@ func (c *controller) instantiateFollowCmd(
 func (c *controller) instantiateUnfollowCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -302,7 +304,7 @@ func (c *controller) instantiateUnfollowCmd(
 func (c *controller) instantiateProfileCmd(
 	commandTermination chan interface{},
 	userdata types.UserData,
-	currentUsers *map[string]types.UserData,
+	currentUsers map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
