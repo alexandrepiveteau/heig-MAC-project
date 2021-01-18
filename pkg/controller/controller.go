@@ -3,6 +3,7 @@ package controller
 import (
 	"climb/pkg/commands"
 	"climb/pkg/types"
+	"climb/pkg/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -12,14 +13,19 @@ import (
 type Controller interface {
 	Bot() *tgbotapi.BotAPI
 	MongoDB() *mongo.Database
+	Neo4j() neo4j.Driver
 
 	AvailableCommands() []types.CommandDefinition
+	GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update
 }
 
 type controller struct {
 	bot         *tgbotapi.BotAPI
 	neo4jDriver neo4j.Driver
 	mongodb     *mongo.Database
+
+	// contacted users
+	users map[string]types.UserData
 
 	availableCommands []types.CommandDefinition
 }
@@ -36,6 +42,8 @@ func GetController(
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
 		mongodb:     mongoClient.Database("db"),
+
+		users: make(map[string]types.UserData),
 	}
 
 	// Define allowed commands
@@ -120,8 +128,34 @@ func (c *controller) MongoDB() *mongo.Database {
 	return c.mongodb
 }
 
+func (c *controller) Neo4j() neo4j.Driver {
+	return c.neo4jDriver
+}
+
 func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
+}
+
+func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update {
+	username := utils.GetUser(&update).String()
+
+	data, prs := c.users[username]
+	if !prs {
+		// create data specific to a user
+		userdata := types.UserData{
+			Username: username,
+			Channel:  make(chan tgbotapi.Update),
+			ChatId:   utils.GetChatId(&update),
+		}
+
+		c.users[username] = userdata
+		data = userdata
+
+		// launch goroutine dedicated to one user
+		go handleUser(c, userdata)
+	}
+
+	return data.Channel
 }
 
 // Private functions
