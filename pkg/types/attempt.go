@@ -27,16 +27,17 @@ type Attempt struct {
 func (a *Attempt) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user UserData,
 ) (string, error) {
 
 	// 1. Store in mongodb
-	id, err := a.createInMongo(db, neo4jDriver)
+	attemptId, err := a.createInMongo(db, neo4jDriver)
 	if err != nil {
 		return "", fmt.Errorf("Creating in mongodb: %w", err)
 	}
 
 	// 2. Create in Neo4j
-	err = a.createInNeo4j(neo4jDriver, id)
+	err = a.createInNeo4j(neo4jDriver, attemptId)
 	if err != nil {
 		return "", fmt.Errorf("Creating in Neo4j: %w", err)
 	}
@@ -52,13 +53,19 @@ func (a *Attempt) Store(
 		return "", fmt.Errorf("Retrieving route to link: %w", err)
 	}
 
-	err = a.linkWith(neo4jDriver, routeId, id)
+	err = a.linkWith(neo4jDriver, routeId, attemptId)
+	if err != nil {
+		return "", fmt.Errorf("Linking in Neo4j: %w", err)
+	}
+
+	// 4. Link with creating user
+	err = a.linkWithUser(neo4jDriver, attemptId, user.Username)
 	if err != nil {
 		return "", fmt.Errorf("Linking in Neo4j: %w", err)
 	}
 
 	// Return mongo's id
-	return id, nil
+	return attemptId, nil
 }
 
 func (a *Attempt) createInMongo(
@@ -156,6 +163,37 @@ func (a *Attempt) linkWith(
 		params := map[string]interface{}{
 			"aId": attemptId,
 			"rId": routeId,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}
+
+func (a *Attempt) linkWithUser(
+	driver neo4j.Driver,
+	attemptId string,
+	username string,
+) error {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (a:Attempt) WHERE a.id = $attemptId
+							MATCH (u:User) WHERE u.name = $username
+							CREATE (u)-[:PERFORMS]->(a)
+							RETURN a`
+
+		params := map[string]interface{}{
+			"attemptId": attemptId,
+			"username":  username,
 		}
 
 		transRes, err := transaction.Run(cypher, params)

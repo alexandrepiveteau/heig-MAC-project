@@ -239,6 +239,7 @@ func (c *controller) instantiateClimbRouteCmd(
 		c.bot,
 		c.mongodb,
 		c.neo4jDriver,
+		userdata,
 	)
 
 	return comm

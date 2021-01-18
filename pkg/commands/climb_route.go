@@ -141,7 +141,7 @@ func (s *climbRouteState) rcvRating(update tgbotapi.Update) bool {
 	return true
 }
 
-func (s *climbRouteState) save() {
+func (s *climbRouteState) save(user types.UserData) {
 	attempt := types.Attempt{
 		GymName:       *s.gym,
 		RouteName:     *s.route,
@@ -152,7 +152,7 @@ func (s *climbRouteState) save() {
 
 	log.Printf("Saving attempt %+v\n", attempt)
 
-	_, err := attempt.Store(s.mongodb, s.neo4jDriver)
+	_, err := attempt.Store(s.mongodb, s.neo4jDriver, user)
 	if err != nil {
 		log.Printf("Error saving Attempt: %s\n", err.Error())
 	}
@@ -164,6 +164,7 @@ func ClimbRouteCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
 ) {
 
 	state := climbRouteState{
@@ -178,7 +179,7 @@ func ClimbRouteCmd(
 		select {
 		case <-comm.StopCommand:
 			// Save data in db, then quit
-			state.save()
+			state.save(user)
 			return
 		case update := <-comm.Updates:
 			switch state.stage {
