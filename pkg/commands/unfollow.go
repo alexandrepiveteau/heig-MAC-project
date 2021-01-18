@@ -1,6 +1,7 @@
 package commands
 
 import (
+	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
@@ -30,24 +31,41 @@ type unfollowState struct {
 	stage unfollowStage
 
 	// internal data
-	username *string
+	username        *string
+	usernameChoices []keyboards.Choice
 }
 
 func (s *unfollowState) init(update tgbotapi.Update) {
+
+	follow := []string{
+		"@alexandrepiveteau",
+		"@matt989253",
+		"@glsubri",
+	}
+
+	for _, username := range follow {
+		s.usernameChoices = append(s.usernameChoices, keyboards.Choice{Action: username, Label: username})
+	}
+
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username you want to unfollow ?")
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
 
 	s.bot.Send(msg)
 	s.stage = unfollowUsername
 }
 
 func (s *unfollowState) rcvUsername(update tgbotapi.Update) bool {
-	data, present := utils.GetMessageData(update)
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(s.usernameChoices)...,
+	)
 	if !present {
-		return false
+		return false // ignore update
 	}
 
 	var text string
 	_, prs := s.currentUsers[data]
+	// Should not happen
 	if !prs {
 		text = "The requested user was not found. Please retype the username."
 		msg := tgbotapi.NewMessage(utils.GetChatId(&update), text)
