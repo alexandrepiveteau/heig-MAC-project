@@ -254,7 +254,7 @@ Récupère la liste des utilisateurs qui sont suivis par ceux que l'utilisateur 
 + `/profile` (get follower count): `MATCH (me:User)<-[f:FOLLOWS]-(followers) WHERE me.name = $username WITH me, count(f) as cFollowers return cFollowers`\
 Récupère le nombre d'utilisateur qui follow directement l'utilisateur courant. Une commande équivalente existe pour récupérer le nombre d'utilisateurs que l'utilisateur courant follow.
 + `/profile` (get attempt number): `MATCH (me:User)-[:PERFORMS]->(a:Attempt)-[:TRY_TO_CLIMB]->(:Route)-[:IS_IN]->(:Gym) WHERE me.name = $username return count(a)`\
-Récupère le nombre d'attemps sur l'importe quelle route dans n'importe quelle gym.
+Récupère le nombre d'attempts sur l'importe quelle route dans n'importe quelle gym.
 
 ## Exemple de graph Neo4J
 
