@@ -5,6 +5,7 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -50,7 +51,9 @@ func (s *challengeState) init(update tgbotapi.Update) {
 		s.usernameChoices = append(s.usernameChoices, keyboards.Choice{Action: username, Label: username})
 	}
 
-	msg2.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+	if len(s.usernameChoices) > 0 {
+		msg2.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+	}
 
 	s.bot.Send(msg1)
 	s.bot.Send(msg2)
