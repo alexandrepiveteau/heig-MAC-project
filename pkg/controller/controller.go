@@ -54,12 +54,6 @@ func GetController(
 		Instantiation: controller.instantiateStartCmd,
 	}
 
-	challengeCmd := types.CommandDefinition{
-		Command:       "challenge",
-		Description:   "The challenge command will allow you to challenge a user you follow to climb a route",
-		Instantiation: controller.instantiateChallengeCmd,
-	}
-
 	addRouteCmd := types.CommandDefinition{
 		Command:       "addRoute",
 		Description:   "The addRoute command will allow you to create a new route",
@@ -100,7 +94,6 @@ func GetController(
 	controller.availableCommands = append(
 		controller.availableCommands,
 		startCmd,
-		challengeCmd,
 		addRouteCmd,
 		climbRouteCmd,
 		findRouteCmd,
@@ -166,24 +159,6 @@ func (c *controller) instantiateStartCmd(
 	comm := types.InitComm()
 
 	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
-
-	return comm
-}
-
-func (c *controller) instantiateChallengeCmd(
-	commandTermination chan interface{},
-	userdata types.UserData,
-	currentUsers map[string]types.UserData,
-) types.Comm {
-	comm := types.InitComm()
-
-	go commands.ChallengeCmd(
-		comm,
-		commandTermination,
-		c.bot,
-		c.mongodb,
-		c.neo4jDriver,
-	)
 
 	return comm
 }

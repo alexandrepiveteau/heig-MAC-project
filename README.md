@@ -114,7 +114,6 @@ Lors de son lancement avec la commande `/start`, le bot indique quelles commande
 
 ```
 /start : The start command shows available commands
-/challenge : The challenge command will allow you to challenge a user you follow to climb a route
 /addRoute : The addRoute command will allow you to create a new route
 /climbRoute : The climbRoute command will allow you to save an attempt
 /findRoute : The findRoute command will allow you to find the name of routes
