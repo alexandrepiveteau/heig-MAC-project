@@ -33,3 +33,33 @@ func (u *UserData) RegisterInNeo4j(
 
 	return err
 }
+
+func (u *UserData) Follow(
+	driver neo4j.Driver,
+	followingUsername string,
+) error {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User) WHERE me.name = $username
+							MATCH (them:User) WHERE them.name = $followingUsername
+							CREATE (me)-[:FOLLOWS]->(them)
+							RETURN me`
+
+		params := map[string]interface{}{
+			"username":          u.Username,
+			"followingUsername": followingUsername,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}

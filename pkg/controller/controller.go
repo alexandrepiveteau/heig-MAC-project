@@ -17,7 +17,7 @@ type Controller interface {
 
 	AvailableCommands() []types.CommandDefinition
 	GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update
-	GetCurrentUsers() *map[string]types.UserData
+	GetCurrentUsers() map[string]types.UserData
 }
 
 type controller struct {
@@ -133,8 +133,8 @@ func (c *controller) Neo4j() neo4j.Driver {
 	return c.neo4jDriver
 }
 
-func (c *controller) GetCurrentUsers() *map[string]types.UserData {
-	return &c.users
+func (c *controller) GetCurrentUsers() map[string]types.UserData {
+	return c.users
 }
 
 func (c *controller) AvailableCommands() []types.CommandDefinition {
