@@ -153,7 +153,8 @@ func (u *UserData) GetFollowerRecommendation(
 
 	names, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
 
-		cypher := `MATCH (me:User)-[:FOLLOWS]->()-[:FOLLOWS]->(following) WHERE me.name = $username RETURN following`
+		cypher := `MATCH (me:User)-[:FOLLOWS]->()-[:FOLLOWS]->(following:User) WHERE me.name = $username AND NOT exists( (me)-[:FOLLOWS]->(following)) RETURN following
+							`
 
 		params := map[string]interface{}{
 			"username": u.Username,

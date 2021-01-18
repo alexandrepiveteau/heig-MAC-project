@@ -43,12 +43,16 @@ func (s *followState) init(update tgbotapi.Update) {
 		log.Printf("When receiving follower recommendation : %s\n", err.Error())
 	}
 
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username the person you want to follow? \n\nHere are a few people you might know: ")
-
 	for _, username := range recommendation {
 		s.usernameChoices = append(s.usernameChoices, keyboards.Choice{Action: username, Label: username})
 	}
 
+	text := "What is @username of the person you want to follow?"
+	if len(s.usernameChoices) > 0 {
+		text += "\n\nHere are a few people you might know:"
+	}
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), text)
 	if len(s.usernameChoices) > 0 {
 		msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
 	}
