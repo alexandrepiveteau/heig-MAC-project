@@ -193,3 +193,9 @@ Ces différents types de noeuds sont aussi liés par certaines relations :
 + `User->[ATTEMPS]->Attempt`, quand un utilisateur fait une tentative sur une route.
 
 ## Requêtes effectuées
+
+Dans chacune de commandes proposées par le bot, nous effectuons un certain nombre de requêtes afin stocker ou récupérer des données. Voici un extrait des requêtes les plus intéressantes:
++ `/follow` (get follower recommendations): `MATCH (me:User)-[:FOLLOWS]->()-[:FOLLOWS]->(following:User) WHERE me.name = $username AND NOT exists( (me)-[:FOLLOWS]->(following)) RETURN following`\
+Récupère la liste des utilisateurs qui sont suivir par ceux que je suis moi-même, s'ils ne font pas déjà partie des utilisateurs que je follow.
+
++ `/profile` (get favourite gym): `COMMAND`
