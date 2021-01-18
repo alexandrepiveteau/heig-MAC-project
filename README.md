@@ -54,6 +54,35 @@ Le bot restera actif jusqu'à ce qu'il reçoive un SIGTERM.
 
 Notre projet est écrit en Golang, ce qui nous permet de profiter de bibliothèques officielles pour accéder à [MongoDB](go.mongodb.org/mongo-driver) et [Neo4J](https://github.com/neo4j/neo4j-go-driver). Nous utilisons aussi une [bibliothèque pour accéder à l'API Telegram](github.com/go-telegram-bot-api/telegram-bot-api).
 
+La structure du code est la suivante (des fichiers liés à Docker et à la documentation ont été masqués par soucis de brièveté) :
+
+```
+.
+├── README.md
+├── go.mod
+├── go.sum
+└── pkg
+    ├── commands
+    │   ├── ***.go
+    │   └── keyboards
+    │       └── ***.go
+    ├── controller
+    │   ├── controller.go
+    │   └── handleUser.go
+    ├── main.go
+    ├── types
+    │   ├── attempt.go
+    │   ├── comm.go
+    │   ├── command_definition.go
+    │   ├── gym.go
+    │   ├── route.go
+    │   └── userData.go
+    └── utils
+        └── utils.go
+```
+
+Le paquet `types` contient les différents types de données stockés et lus depuis MongoDB et Neo4J. C'est là que les différentes requêtes se trouvent, ainsi que les scripts de création des différents types d'entités.
+
 ## Guide utilisateur
 
 Notre bot permet à des utilisateurs de rentrer des voies dans différentes salles, de leur attribuer des attributs, d'enregistrer des tentatives. Il y a aussi une composante sociale : les utilisateurs peuvent se suivre les uns avec les autres.
