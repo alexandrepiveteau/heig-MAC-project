@@ -136,6 +136,7 @@ func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Upd
 
 	data, prs := c.users[username]
 	if !prs {
+		// create data specific to a user
 		userdata := types.UserData{
 			Username: username,
 			Channel:  make(chan tgbotapi.Update),
@@ -144,6 +145,9 @@ func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Upd
 
 		c.users[username] = userdata
 		data = userdata
+
+		// launch goroutine dedicated to one user
+		go handleUser(c, userdata.Channel)
 	}
 
 	return data.Channel
