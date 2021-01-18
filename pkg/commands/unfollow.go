@@ -5,6 +5,7 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -37,10 +38,9 @@ type unfollowState struct {
 
 func (s *unfollowState) init(update tgbotapi.Update) {
 
-	follow := []string{
-		"@alexandrepiveteau",
-		"@matt989253",
-		"@glsubri",
+	follow, err := s.user.GetFollowing(s.neo4jDriver)
+	if err != nil {
+		log.Println(err.Error())
 	}
 
 	for _, username := range follow {
