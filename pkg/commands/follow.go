@@ -85,7 +85,9 @@ func FollowCmd(
 	for {
 		select {
 		case <-comm.StopCommand:
-			user.Follow(neo4jDriver, *state.username)
+			if state.username != nil {
+				user.Follow(neo4jDriver, *state.username)
+			}
 			return
 		case update := <-comm.Updates:
 			switch state.stage {
