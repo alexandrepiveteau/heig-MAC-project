@@ -191,3 +191,135 @@ func (u *UserData) GetFollowerRecommendation(
 
 	return retValue, nil
 }
+
+func (u *UserData) GetFollowingCount(
+	driver neo4j.Driver,
+) (int64, error) {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	res, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User)-[:FOLLOWS]->(followers) WHERE me.name = $username WITH me, count(followers) as cFollowers return cFollowers`
+
+		params := map[string]interface{}{
+			"username": u.Username,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+
+		collect, _ := transRes.Collect()
+		if len(collect) < 1 {
+			return int64(0), nil
+		}
+
+		count := collect[0].Values[0]
+
+		return count, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res.(int64), nil
+}
+
+func (u *UserData) GetFollowerCount(
+	driver neo4j.Driver,
+) (int64, error) {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	res, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User)<-[f:FOLLOWS]-(followers) WHERE me.name = $username WITH me, count(f) as cFollowers return cFollowers`
+
+		params := map[string]interface{}{
+			"username": u.Username,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+
+		collect, _ := transRes.Collect()
+		if len(collect) < 1 {
+			return int64(0), nil
+		}
+
+		count := collect[0].Values[0]
+
+		return count, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res.(int64), nil
+}
+
+func (u *UserData) GetNumberOfAttempts(
+	driver neo4j.Driver,
+) (int64, error) {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	res, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User)-[:PERFORMS]->(a:Attempt)-[:TRY_TO_CLIMB]->(:Route)-[:IS_IN]->(:Gym) WHERE me.name = $username return count(a)`
+
+		params := map[string]interface{}{
+			"username": u.Username,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+
+		collect, _ := transRes.Collect()
+		if len(collect) < 1 {
+			return int64(0), nil
+		}
+
+		count := collect[0].Values[0]
+
+		return count, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res.(int64), nil
+}
+
+func (u *UserData) GetProfile(
+	driver neo4j.Driver,
+) (int64, int64, int64, error) {
+	followers, err := u.GetFollowerCount(driver)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	following, err := u.GetFollowingCount(driver)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	attempts, err := u.GetNumberOfAttempts(driver)
+	if err != nil {
+		return 0, 0, 0, err
+	}
+
+	return followers, following, attempts, nil
+}

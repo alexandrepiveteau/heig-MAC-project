@@ -4,6 +4,8 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +27,9 @@ type profileState struct {
 	// Stage of the progress in the command
 	stage profileStage
 
+	user         types.UserData
+	currentUsers map[string]types.UserData
+
 	// internal data
 	username *string
 }
@@ -44,10 +49,25 @@ func (s *profileState) rcvUsername(update tgbotapi.Update) bool {
 		return false
 	}
 
-	// TODO : Check whether this user exists in the database before moving to the next state.
+	user, prs := s.currentUsers[data]
+	if !prs {
+		msg := tgbotapi.NewMessage(
+			utils.GetChatId(&update),
+			fmt.Sprintf("@%s never contacted me. Send him this link to get him started: t.me/climbot", data),
+		)
+		s.bot.Send(msg)
+		return false
+	}
+	s.username = &data
+
+	followers, following, attempts, err := user.GetProfile(s.neo4jDriver)
+	if err != nil {
+		log.Println(err.Error())
+	}
+
 	msg := tgbotapi.NewMessage(
 		utils.GetChatId(&update),
-		fmt.Sprintf("@%s never contacted me. Send him this link to get him started: t.me/climbot", data),
+		fmt.Sprintf("@%s has %d followers and is following %d other people.\nThey have made %d attempts.", data, followers, following, attempts),
 	)
 	s.bot.Send(msg)
 
@@ -61,11 +81,16 @@ func ProfileCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
+	currentUsers map[string]types.UserData,
 ) {
 	state := profileState{
 		bot:         bot,
 		mongodb:     mongodb,
 		neo4jDriver: neo4jDriver,
+
+		user:         user,
+		currentUsers: currentUsers,
 
 		stage: profileInit,
 	}
@@ -73,7 +98,6 @@ func ProfileCmd(
 	for {
 		select {
 		case <-comm.StopCommand:
-			// TODO : Actually follow the user.
 			return
 		case update := <-comm.Updates:
 			switch state.stage {

@@ -272,6 +272,8 @@ func (c *controller) instantiateProfileCmd(
 		c.bot,
 		c.mongodb,
 		c.neo4jDriver,
+		userdata,
+		currentUsers,
 	)
 
 	return comm
