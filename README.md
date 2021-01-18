@@ -76,7 +76,7 @@ Bot             : Thanks! We've added this route.
 
 ## Modèle de données
 
-## MongoDB
+## MongoDB
 
 MongoDB nous sert à stocker certaines méta-données liées aux routes et aux salles (dénommées `gym` dans notre code). Nous avons mis en place les collections suivantes :
 
