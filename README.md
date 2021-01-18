@@ -73,6 +73,64 @@ Bot             : What colors are the holds ?
 User [keyboard] : Green
 Bot             : Thanks! We've added this route.
 ```
+<img src="assets/addRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `climbRoute` crée une nouvelle tentative sur une route. On commence par rentrer le nom de la salle et de la route, notre performance lors de la tentative, notre impression de la difficulté de la route, ainsi qu'une note de notre appréciation de la route.
+```
+User [input]    : /climbRoute
+Bot             : Adding a new attempt to an existing route.
+Bot             : In which gym are you climbing?
+User [input]    : Le Cube
+Bot             : What is the name of the route?
+User [input]    : Jack et le haricot magique
+Bot             : What was your performance?
+User [keyboard] : Flashed
+Bot             : How would you grade the route?
+User [keyboard] : 5B
+Bot             : How enjoyable was the route?
+User [keyboard] : 8
+Bot             : Long live the swollen forearms!
+```
+<img src="assets/climbRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `findRoute` recherche des routes existantes. On commence par rentrer le nom de la salle, la difficulté de la route que l'on cherche ainsi que la couleur de ses prises. Le bot renvoie alors le nom de toutes les routes existantes correspondant à ces caractéristiques.
+```
+User [input]    : /findRoute
+Bot             : Searching for routes.
+Bot             : In which gym do you want to find the route?
+User [input]    : Le Cube
+Bot             : What is the grade of the route?
+User [keyboard] : 5A
+Bot             : What color are the holds?
+User [keyboard] : Green
+Bot             : Thanks! We're looking for this route
+Bot             : Found routes:
+                  (1) Jack et le haricot magique
+```
+<img src="assets/findRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `follow` permet de suivre des utilisateurs et obtenir des recommandations de nouvelles personnes à suivre. Si l'utilisateur n'a pas de username Telegram, il est aussi aussi possible de taper son nom complet (`John Snow`) à la place.
+```
+User [input]    : /follow
+Bot             : What is @username of the person you want to follow?
+User [input]    : glsubri
+Bot             : You're now following @glsubri !
+User [input]    : /follow
+Bot             : What is @username of the person you want to follow?
+                  Here are a few people you might know:
+User [keyboard] : alexandrepiveteau
+Bot             : You're now following @alexandrepiveteau !
+```
+<img src="assets/follow.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `unfollow` permet de suivre des utilisateurs et obtenir des recommandations de nouvelles personnes à suivre.
+```
+User [input]    : /unfollow
+Bot             : What is the @username you want to unfollow ?
+User [keyboard] : alexandrepiveteau
+Bot             : You're not following @alexandrepiveteau anymore !
+```
+<img src="assets/unfollow.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
 ## Modèle de données
 
