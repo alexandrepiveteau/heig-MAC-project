@@ -3,6 +3,7 @@ package controller
 import (
 	"climb/pkg/commands"
 	"climb/pkg/types"
+	"climb/pkg/utils"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -14,6 +15,7 @@ type Controller interface {
 	MongoDB() *mongo.Database
 
 	AvailableCommands() []types.CommandDefinition
+	GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update
 }
 
 type controller struct {
@@ -127,6 +129,24 @@ func (c *controller) MongoDB() *mongo.Database {
 
 func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
+}
+
+func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update {
+	username := utils.GetUser(&update).String()
+
+	data, prs := c.users[username]
+	if !prs {
+		userdata := types.UserData{
+			Username: username,
+			Channel:  make(chan tgbotapi.Update),
+			ChatId:   utils.GetChatId(&update),
+		}
+
+		c.users[username] = userdata
+		data = userdata
+	}
+
+	return data.Channel
 }
 
 // Private functions
