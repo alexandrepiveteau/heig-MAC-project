@@ -203,3 +203,44 @@ func RouteGetId(
 
 	return objectId.Hex(), nil
 }
+
+// RouteFind retuns a slice of Route corresponding to the given parameters
+func RouteFind(
+	db *mongo.Database,
+	gymName string,
+	routeGrade string,
+	routeHolds string,
+) ([]Route, error) {
+
+	gymId, err := GymGetId(db, gymName)
+	if err != nil {
+		return make([]Route, 0), fmt.Errorf("Getting gym id: %w", err)
+	}
+
+	// Filter all routes
+	filterCursor, err := routeCollection(db).Find(
+		context.TODO(),
+		bson.D{
+			{Key: "gym", Value: gymId},
+			{Key: "grade", Value: routeGrade},
+			{Key: "holds", Value: routeHolds},
+		},
+	)
+	if err != nil {
+		return make([]Route, 0), fmt.Errorf("Filtering collection: %w", err)
+	}
+	defer filterCursor.Close(context.TODO())
+
+	routes := make([]Route, 0)
+	for filterCursor.Next(context.TODO()) {
+		var route Route
+		if err = filterCursor.Decode(&route); err != nil {
+			log.Println(err.Error())
+			continue
+		}
+
+		routes = append(routes, route)
+	}
+
+	return routes, nil
+}
