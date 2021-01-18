@@ -74,6 +74,24 @@ User [keyboard] : Green
 Bot             : Thanks! We've added this route.
 ```
 
++ `climbRoute` crée une nouvelle tentative sur une route. On commence par rentrer le nom de la salle et de la route, notre performance lors de la tentative, notre impression de la difficulté de la route, ainsi qu'une note de notre appréciation de la route..
+```
+User [input]    : /climbRoute
+Bot             : Adding a new attempt to an existing route.
+Bot             : In which gym are you climbing?
+User [input]    : Le Cube
+Bot             : What is the name of the route?
+User [input]    : Jack et le haricot magique
+Bot             : What was your performance?
+User [keyboard] : Flashed
+Bot             : How would you grade the route?
+User [keyboard] : 5B
+Bot             : How enjoyable was the route?
+User [keyboard] : 8
+Bot             : Long live the swollen forearms!
+```
+<img src="assets/climbRoute.png" width="50%" height="50%" alt="asd">
+
 ## Modèle de données
 
 ## Requêtes effectuées
