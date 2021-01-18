@@ -1,9 +1,11 @@
 package commands
 
 import (
+	"climb/pkg/commands/keyboards"
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+	"log"
 
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
@@ -30,20 +32,41 @@ type followState struct {
 	currentUsers map[string]types.UserData
 
 	// internal data
-	username *string
+	usernameChoices []keyboards.Choice
+	username        *string
 }
 
 func (s *followState) init(update tgbotapi.Update) {
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username the person you want to follow? Make sure he already contacted me at least once.")
+
+	recommendation, err := s.user.GetFollowerRecommendation(s.neo4jDriver)
+	if err != nil {
+		log.Printf("When receiving follower recommendation : %s\n", err.Error())
+	}
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username the person you want to follow? \n\nHere are a few people you might know: ")
+
+	for _, username := range recommendation {
+		s.usernameChoices = append(s.usernameChoices, keyboards.Choice{Action: username, Label: username})
+	}
+
+	msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
 
 	s.bot.Send(msg)
 	s.stage = followUsername
 }
 
 func (s *followState) rcvUsername(update tgbotapi.Update) bool {
-	data, present := utils.GetMessageData(update)
+	data, present := utils.GetInlineKeyboardData(
+		update,
+		keyboards.GetActions(s.usernameChoices)...,
+	)
 	if !present {
-		return false
+		// Get username when not in custom keyboard
+		username, present := utils.GetMessageData(update)
+		if !present {
+			return false // ignore update
+		}
+		data = username
 	}
 
 	var text string

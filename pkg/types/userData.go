@@ -143,3 +143,50 @@ func (u *UserData) GetFollowing(
 
 	return retValue, nil
 }
+
+func (u *UserData) GetFollowerRecommendation(
+	driver neo4j.Driver,
+) ([]string, error) {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	names, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User)-[:FOLLOWS]->()-[:FOLLOWS]->(following) WHERE me.name = $username RETURN following`
+
+		params := map[string]interface{}{
+			"username": u.Username,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+
+		result := make([]string, 0)
+		collect, _ := transRes.Collect()
+		for _, res := range collect {
+			node := res.Values[0].(dbtype.Node)
+
+			name, ok := node.Props["name"].(string)
+			if !ok {
+				return nil, errors.New("Could not cast name to string")
+			}
+			result = append(result, name)
+		}
+
+		return result, nil
+	})
+
+	if err != nil {
+		return nil, err
+	}
+
+	retValue, ok := names.([]string)
+	if !ok {
+		return nil, errors.New("Could not cast names to []string")
+	}
+
+	return retValue, nil
+}
