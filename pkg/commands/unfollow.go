@@ -48,7 +48,10 @@ func (s *unfollowState) init(update tgbotapi.Update) {
 	}
 
 	msg := tgbotapi.NewMessage(utils.GetChatId(&update), "What is the @username you want to unfollow ?")
-	msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+
+	if len(s.usernameChoices) > 0 {
+		msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+	}
 
 	s.bot.Send(msg)
 	s.stage = unfollowUsername
