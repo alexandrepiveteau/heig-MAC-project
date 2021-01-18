@@ -28,16 +28,17 @@ type Route struct {
 func (r *Route) Store(
 	db *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	creatingUser UserData,
 ) (string, error) {
 
 	// 1. Store in mongodb
-	id, err := r.createInMongo(db, neo4jDriver)
+	routeId, err := r.createInMongo(db, neo4jDriver)
 	if err != nil {
 		return "", err
 	}
 
 	// 2. Create in Neo4j
-	err = r.createInNeo4j(neo4jDriver, id)
+	err = r.createInNeo4j(neo4jDriver, routeId)
 	if err != nil {
 		return "", err
 	}
@@ -47,10 +48,20 @@ func (r *Route) Store(
 	if err != nil {
 		return "", err
 	}
-	err = r.linkWith(neo4jDriver, id, gymId)
+
+	err = r.linkWith(neo4jDriver, routeId, gymId)
+	if err != nil {
+		return "", err
+	}
+
+	// 4. Link with Creating user
+	err = r.linkWithCreatingUser(neo4jDriver, routeId, creatingUser.Username)
+	if err != nil {
+		return "", err
+	}
 
 	// Return mongo's id
-	return id, nil
+	return routeId, nil
 }
 
 func (r *Route) createInMongo(
@@ -150,6 +161,37 @@ func (r *Route) linkWith(
 		params := map[string]interface{}{
 			"rId": routeId,
 			"gId": gymId,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}
+
+func (r *Route) linkWithCreatingUser(
+	driver neo4j.Driver,
+	routeId string,
+	username string,
+) error {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (r:Route) WHERE r.id = $rId
+							MATCH (u:User) WHERE u.name = $username
+							CREATE (u)-[:CREATED]->(r)
+							RETURN r`
+
+		params := map[string]interface{}{
+			"rId":      routeId,
+			"username": username,
 		}
 
 		transRes, err := transaction.Run(cypher, params)

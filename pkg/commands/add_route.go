@@ -115,7 +115,7 @@ func (s *addRouteState) rcvHolds(update tgbotapi.Update) bool {
 	return true
 }
 
-func (s *addRouteState) save() {
+func (s *addRouteState) save(user types.UserData) {
 	route := types.Route{
 		Gym:   *s.gym,
 		Name:  *s.name,
@@ -125,7 +125,7 @@ func (s *addRouteState) save() {
 
 	log.Println("Saving route")
 
-	_, err := route.Store(s.mongodb, s.neo4jDriver)
+	_, err := route.Store(s.mongodb, s.neo4jDriver, user)
 	if err != nil {
 		log.Printf("Error saving Route: %s\n", err.Error())
 	}
@@ -137,6 +137,7 @@ func AddRouteCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
 ) {
 
 	state := addRouteState{
@@ -151,7 +152,7 @@ func AddRouteCmd(
 		select {
 		case <-comm.StopCommand:
 			// Save data in db, then quit
-			state.save()
+			state.save(user)
 			return
 
 		case update := <-comm.Updates:
