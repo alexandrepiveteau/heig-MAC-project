@@ -4,26 +4,26 @@
 ![.github/workflows/format.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/format.yml/badge.svg)
 ![.github/workflows/tests.yml](https://github.com/heig-MAC/project/workflows/.github/workflows/tests.yml/badge.svg)
 
-A Telegram bot for everything related to climbing. This is a semester project done at HEIG-VD.
+Un bot Telegram pour tout ce qui est lié à la grimpe. Réalisé dans le cadre du mini-projet du cours MAC à la HEIG-VD.
 
-:pushpin: Model [on Miro](https://miro.com/app/board/o9J_lZlt3Rw=/) :pushpin:
+:pushpin: Modèle [sur Miro](https://miro.com/app/board/o9J_lZlt3Rw=/) :pushpin:
 
-## Team
+## Équipe
 
-| Name                                   |                                  |
+| Nom                                    |                                  |
 |----------------------------------------|----------------------------------|
 | Matthieu Burguburu                     | matthieu.burguburu@heig-vd.ch    |
 | Alexandre Piveteau                     | alexandre.piveteau@heig-vd.ch    |
 | Guy-Laurent Subri                      | guy-laurent.subri@heig-vd.ch     |
 
-## Setting the project up
+## Mise en place du projet
 
-To run the project locally, you'll need:
+Pour faire tourner le bot en local, il vous faudra:
 
-- [Docker compose](https://docs.docker.com/compose/); and
-- a Telegram [bot API token](https://core.telegram.org/bots/api).
+- [Docker compose](https://docs.docker.com/compose/); et
+- un [bot API token](https://core.telegram.org/bots/api) Telegram.
 
-You'll have to create a file named `.env` in `./docker/topologies/dev` :
+Il vous faudra aussi créer un fichier nommé `.env` dans `./docker/topologies/dev` :
 
 ```sh
 > cat ./docker/topologies/dev/.env
@@ -32,10 +32,48 @@ TELEGRAM_BOT_DEBUG=false
 TELEGRAM_BOT_TOKEN=123_YOUR_TELEGRAM_API_TOKEN
 ```
 
-Running the bot then done as follows:
+Le lancement du bot se fait de la manière suivante:
 
 ```sh
 > ./run-compose.sh
 ```
 
-The bot will remain active until it receives a SIGTERM.
+Le bot restera actif jusqu'à ce qu'il reçoive un SIGTERM.
+
+## Guide utilisateur
+
+Notre bot permet à des utilisateurs de rentrer des voies dans différentes salles, de leur attribuer des attributs, d'enregistrer des tentatives. Il y a aussi une composante sociale : les utilisateurs peuvent se suivre les uns avec les autres.
+
+Lors de son lancement avec la commande `/start`, le bot indique quelles commandes sont disponibles :
+
+```
+/start : The start command shows available commands
+/challenge : The challenge command will allow you to challenge a user you follow to climb a route
+/addRoute : The addRoute command will allow you to create a new route
+/climbRoute : The climbRoute command will allow you to save an attempt
+/findRoute : The findRoute command will allow you to find the name of routes
+/follow : The follow will allow you to follow another user
+/unfollow : The unfollow will allow you to stop following another user
+/profile : The profile will allow you to see infos about an user, like best route climbed and follower numbers
+```
+
+Les commandes sont les actions suivantes :
+
++ `addRoute` crée une nouvelle route avec quelques méta-données. On commence par rentrer le nom de la salle, suivi du nom de la route, de la couleur de ses prises en finalement de son niveau de difficulté. Les routes sont créées pour tous les utilisateurs.
+
+```
+User [input]    : /addRoute
+Bot             : In which gym would you like to add the route?
+User [input]    : Le Cube
+Bot             : What is the name of the route?
+User [input]    : Jack et le haricot magique
+Bot             : What is the grade of the route ?
+User [keyboard] : 5A
+Bot             : What colors are the holds ?
+User [keyboard] : Green
+Bot             : Thanks! We've added this route.
+```
+
+## Modèle de données
+
+## Requêtes effectuées
