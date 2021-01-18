@@ -60,14 +60,14 @@ func (s *profileState) rcvUsername(update tgbotapi.Update) bool {
 	}
 	s.username = &data
 
-	followers, following, err := user.GetProfile(s.neo4jDriver)
+	followers, following, attempts, err := user.GetProfile(s.neo4jDriver)
 	if err != nil {
 		log.Println(err.Error())
 	}
 
 	msg := tgbotapi.NewMessage(
 		utils.GetChatId(&update),
-		fmt.Sprintf("@%s has %d followers and is following %d other people.", data, followers, following),
+		fmt.Sprintf("@%s has %d followers and is following %d other people.\nThey have made %d attempts.", data, followers, following, attempts),
 	)
 	s.bot.Send(msg)
 
