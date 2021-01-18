@@ -109,6 +109,29 @@ Bot             : Found routes:
 ```
 <img src="assets/findRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
++ `follow` permet de suivre des utilisateurs et obtenir des recommendations de nouvelles personnes à suivre.
+```
+User [input]    : /follow
+Bot             : What is @username of the person you want to follow?
+User [input]    : glsubri
+Bot             : You're now following @glsubri !
+User [input]    : /follow
+Bot             : What is @username of the person you want to follow?
+                  Here are a few people you might know:
+User [keyboard] : alexandrepiveteau
+Bot             : You're now following @alexandrepiveteau !
+```
+<img src="assets/follow.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `unfollow` permet de suivre des utilisateurs et obtenir des recommendations de nouvelles personnes à suivre.
+```
+User [input]    : /unfollow
+Bot             : What is the @username you want to unfollow ?
+User [keyboard] : alexandrepiveteau
+Bot             : You're not following @alexandrepiveteau anymore !
+```
+<img src="assets/unfollow.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
 ## Modèle de données
 
 ## Requêtes effectuées
