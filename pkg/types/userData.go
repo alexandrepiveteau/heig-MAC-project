@@ -191,3 +191,36 @@ func (u *UserData) GetFollowerRecommendation(
 
 	return retValue, nil
 }
+
+func (u *UserData) GetFollowingCount(
+	driver neo4j.Driver,
+) (int64, error) {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	res, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User)-[:FOLLOWS]->(followers) WHERE me.name = $username WITH me, count(followers) as cFollowers return cFollowers`
+
+		params := map[string]interface{}{
+			"username": u.Username,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+
+		collect, _ := transRes.Collect()
+		count := collect[0].Values[0]
+
+		return count, nil
+	})
+
+	if err != nil {
+		return 0, err
+	}
+
+	return res.(int64), nil
+}

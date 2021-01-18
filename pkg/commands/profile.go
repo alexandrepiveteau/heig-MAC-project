@@ -4,6 +4,8 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+	"log"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -25,6 +27,9 @@ type profileState struct {
 	// Stage of the progress in the command
 	stage profileStage
 
+	user         types.UserData
+	currentUsers map[string]types.UserData
+
 	// internal data
 	username *string
 }
@@ -44,6 +49,19 @@ func (s *profileState) rcvUsername(update tgbotapi.Update) bool {
 		return false
 	}
 
+	user, prs := s.currentUsers[data]
+	if !prs {
+		return false
+	}
+	s.username = &data
+
+	count, err := user.GetFollowingCount(s.neo4jDriver)
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	log.Println(count)
+
 	// TODO : Check whether this user exists in the database before moving to the next state.
 	msg := tgbotapi.NewMessage(
 		utils.GetChatId(&update),
@@ -61,11 +79,16 @@ func ProfileCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
+	currentUsers map[string]types.UserData,
 ) {
 	state := profileState{
 		bot:         bot,
 		mongodb:     mongodb,
 		neo4jDriver: neo4jDriver,
+
+		user:         user,
+		currentUsers: currentUsers,
 
 		stage: profileInit,
 	}
