@@ -52,7 +52,7 @@ Le bot restera actif jusqu'à ce qu'il reçoive un SIGTERM.
 
 ## Structure du bot
 
-Notre projet est écrit en Golang, ce qui nous permet de profiter de bibliothèques officielles pour accéder à [MongoDB](go.mongodb.org/mongo-driver) et [Neo4J](https://github.com/neo4j/neo4j-go-driver). Nous utilisons aussi une [bibliothèque pour accéder à l'API Telegram](github.com/go-telegram-bot-api/telegram-bot-api).
+Notre projet est écrit en Golang, ce qui nous permet de profiter de bibliothèques officielles pour accéder à [MongoDB](https://go.mongodb.org/mongo-driver) et [Neo4J](https://github.com/neo4j/neo4j-go-driver). Nous utilisons aussi une [bibliothèque pour accéder à l'API Telegram](https://github.com/go-telegram-bot-api/telegram-bot-api).
 
 La structure du code est la suivante (des fichiers liés à Docker et à la documentation ont été masqués par soucis de brièveté) :
 
