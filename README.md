@@ -109,7 +109,7 @@ Bot             : Found routes:
 ```
 <img src="assets/findRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
-+ `follow` permet de suivre des utilisateurs et obtenir des recommandations de nouvelles personnes à suivre.
++ `follow` permet de suivre des utilisateurs et obtenir des recommandations de nouvelles personnes à suivre. Si l'utilisateur n'a pas de username Telegram, il est aussi aussi possible de taper son nom complet (`John Snow`) à la place.
 ```
 User [input]    : /follow
 Bot             : What is @username of the person you want to follow?
