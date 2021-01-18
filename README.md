@@ -258,4 +258,4 @@ Récupère le nombre d'utilisateur qui follow directement l'utilisateur courant.
 
 Voici un extrait de l'UI Neo4J après quelques commandes de la part de 3 utilisateurs.
 
-<img src="assets/graph.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+<img src="assets/graph.png" width="100%" height="100%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
