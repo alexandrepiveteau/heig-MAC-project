@@ -4,6 +4,7 @@ import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
 	"fmt"
+
 	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
 	"github.com/neo4j/neo4j-go-driver/v4/neo4j"
 	"go.mongodb.org/mongo-driver/mongo"
@@ -21,6 +22,9 @@ type unfollowState struct {
 	bot         *tgbotapi.BotAPI
 	mongodb     *mongo.Database
 	neo4jDriver neo4j.Driver
+
+	user         types.UserData
+	currentUsers map[string]types.UserData
 
 	// Stage of the progress in the command
 	stage unfollowStage
@@ -42,8 +46,19 @@ func (s *unfollowState) rcvUsername(update tgbotapi.Update) bool {
 		return false
 	}
 
-	// TODO : Do some database stuff.
-	msg := tgbotapi.NewMessage(utils.GetChatId(&update), fmt.Sprintf("You're not following @%s anymore !", data))
+	var text string
+	_, prs := s.currentUsers[data]
+	if !prs {
+		text = "The requested user was not found. Please retype the username."
+		msg := tgbotapi.NewMessage(utils.GetChatId(&update), text)
+		s.bot.Send(msg)
+		return false
+	} else {
+		s.username = &data
+		text = fmt.Sprintf("You're not following @%s anymore !", data)
+	}
+
+	msg := tgbotapi.NewMessage(utils.GetChatId(&update), text)
 	s.bot.Send(msg)
 
 	s.stage = unfollowEnd
@@ -56,11 +71,16 @@ func UnfollowCmd(
 	bot *tgbotapi.BotAPI,
 	mongodb *mongo.Database,
 	neo4jDriver neo4j.Driver,
+	user types.UserData,
+	currentUsers map[string]types.UserData,
 ) {
 	state := unfollowState{
 		bot:         bot,
 		mongodb:     mongodb,
 		neo4jDriver: neo4jDriver,
+
+		user:         user,
+		currentUsers: currentUsers,
 
 		stage: unfollowInit,
 	}
@@ -68,7 +88,7 @@ func UnfollowCmd(
 	for {
 		select {
 		case <-comm.StopCommand:
-			// TODO : Actually unfollow the user.
+			user.Unfollow(neo4jDriver, *state.username)
 			return
 		case update := <-comm.Updates:
 			switch state.stage {

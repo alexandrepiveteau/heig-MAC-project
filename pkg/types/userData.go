@@ -63,3 +63,33 @@ func (u *UserData) Follow(
 
 	return err
 }
+
+func (u *UserData) Unfollow(
+	driver neo4j.Driver,
+	unfollowingUsername string,
+) error {
+
+	session := driver.NewSession(neo4j.SessionConfig{AccessMode: neo4j.AccessModeWrite})
+	defer session.Close()
+
+	_, err := session.WriteTransaction(func(transaction neo4j.Transaction) (interface{}, error) {
+
+		cypher := `MATCH (me:User) WHERE me.name = $username
+							MATCH (them:User) WHERE them.name = $unfollowingUsername
+							MATCH (me)-[f:FOLLOWS]->(them)
+							DELETE f`
+
+		params := map[string]interface{}{
+			"username":            u.Username,
+			"unfollowingUsername": unfollowingUsername,
+		}
+
+		transRes, err := transaction.Run(cypher, params)
+		if err != nil {
+			return nil, err
+		}
+		return transRes, nil
+	})
+
+	return err
+}

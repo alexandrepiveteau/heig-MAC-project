@@ -296,6 +296,8 @@ func (c *controller) instantiateUnfollowCmd(
 		c.bot,
 		c.mongodb,
 		c.neo4jDriver,
+		userdata,
+		currentUsers,
 	)
 
 	return comm
