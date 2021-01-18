@@ -90,7 +90,7 @@ Bot             : How enjoyable was the route?
 User [keyboard] : 8
 Bot             : Long live the swollen forearms!
 ```
-<img src="assets/climbRoute.png" width="50%" height="50%" alt="asd">
+<img src="assets/climbRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
 ## Modèle de données
 
