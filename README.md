@@ -73,6 +73,7 @@ Bot             : What colors are the holds ?
 User [keyboard] : Green
 Bot             : Thanks! We've added this route.
 ```
+<img src="assets/addRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
 + `climbRoute` crée une nouvelle tentative sur une route. On commence par rentrer le nom de la salle et de la route, notre performance lors de la tentative, notre impression de la difficulté de la route, ainsi qu'une note de notre appréciation de la route..
 ```
@@ -91,6 +92,22 @@ User [keyboard] : 8
 Bot             : Long live the swollen forearms!
 ```
 <img src="assets/climbRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
+
++ `findRoute` recherche des routes existantes. On commence par rentrer le nom de la salle, la difficulté de la route que l'on cherche ainsi que la couleur de ses prises. Le bot renvoie alors le nom de toutes les routes existantes correspondant à ces caractéristiques.
+```
+User [input]    : /findRoute
+Bot             : Searching for routes.
+Bot             : In which gym do you want to find the route?
+User [input]    : Le Cube
+Bot             : What is the grade of the route?
+User [keyboard] : 5A
+Bot             : What color are the holds?
+User [keyboard] : Green
+Bot             : Thanks! We're looking for this route
+Bot             : Found routes:
+                  (1) Jack et le haricot magique
+```
+<img src="assets/findRoute.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
 ## Modèle de données
 
