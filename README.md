@@ -76,4 +76,50 @@ Bot             : Thanks! We've added this route.
 
 ## Modèle de données
 
+## MongoDB
+
+MongoDB nous sert à stocker certaines méta-données liées aux routes et aux salles (dénommées `gym` dans notre code). Nous avons mis en place les collections suivantes :
+
++ `gym`, qui contient les méta-données suivantes des salles:
+    - `name`, le nom de la salle.
++ `routes`, qui contient les méta-données suivantes des routes:
+    - `gym`, le nom de la salle dans laquelle se situe la route;
+    - `name`, le nom de voie. Il est unique au sein d'une même salle;
+    - `grade`, la difficulté de la voie. Elle est attribuée quand la voie est créée; et
+    - `holds`, la couleur des prises de cette voie.
++ `attempts`, qui contient les méta-données des tentatives des utilisateurs:
+    - `gym`, le nom de la salle pour cette tentative;
+    - `route`, le nom de la route de la tentative;
+    - `proposedGrade`, la difficulté estimée par l'utilisateur lors de la tentative;
+    - `performance`, le résultat de la tentative de l'utilisateur; et
+    - `rating`, la note attribuée par l'utilisateur à la voie.
+
+## Neo4J
+
+Neo4J nous permet de stocker les relations entre les gyms, les voies, les utilisateurs et leurs tentatives. Nous avons mis en place les noeuds suivants :
+
++ `Gym`, qui contient les attributs suivants:
+    - `gymId`, l'identifiant MongoDB de la salle; et
+    - `name`, le nom de la salle.
++ `Route`, qui contient les attributs suivants:
+    - `id`, l'identifiant MongoDB de la voie;
+    - `name`, le nom de la voie;
+    - `grade`, la difficulté de la voie; et
+    - `holds`, la couleur des prises de cette voie.
++ `User`, qui correspond à un utilisateur de notre bot et qui a les attributs suivants:
+    - `name`, qui contient soit le username Telegram de l'utilisateur (s'il en possède un), soit son nom complet sur Telegram.
++ `Attempt`, qui correspond à une tentative de l'utilsateur et a les attributs suivants:
+    - `id`, l'identifiant MongoDB de la tentative;
+    - `proposedGrade`, la difficulté estimée par l'utilisateur;
+    - `performance`, le résultat associé à la tentative (`flashed`, `succeeded` ou `failed`);
+    - `rating`, la note attribuée par l'utilisateur.
+
+Ces différents types de noeuds sont aussi liés par certaines relations :
+
++ `Attempt->[TRY_TO_CLIMB]->Route`, quand une tentative est effectuée sur une route particulière. Cette relation est créée lors de l'ajout de la tentative à la base de données;
++ `Route->[IS_IN]->Gym`, quand une route est créée dans une salle particulière; Cette relation est créée lors de l'ajout de la route;
++ `User->[CREATED]->Route`, quand une route est créée par un utilisateur spécifique. Cette relation est créée lors de l'ajout de la route; et
++ `User->[FOLLOWS]->User`, quand un utilisateur suit un autre utilisateur;
++ `User->[ATTEMPS]->Attempt`, quand un utilisateur fait une tentative sur une route.
+
 ## Requêtes effectuées
