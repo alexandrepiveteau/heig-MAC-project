@@ -17,6 +17,7 @@ type Controller interface {
 
 	AvailableCommands() []types.CommandDefinition
 	GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update
+	GetCurrentUsers() *map[string]types.UserData
 }
 
 type controller struct {
@@ -132,6 +133,10 @@ func (c *controller) Neo4j() neo4j.Driver {
 	return c.neo4jDriver
 }
 
+func (c *controller) GetCurrentUsers() *map[string]types.UserData {
+	return &c.users
+}
+
 func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
 }
@@ -160,7 +165,11 @@ func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Upd
 
 // Private functions
 
-func (c *controller) instantiateStartCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateStartCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
@@ -168,7 +177,11 @@ func (c *controller) instantiateStartCmd(commandTermination chan interface{}) ty
 	return comm
 }
 
-func (c *controller) instantiateColorCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateColorCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.ColorCmd(comm, commandTermination, c.bot)
@@ -176,7 +189,11 @@ func (c *controller) instantiateColorCmd(commandTermination chan interface{}) ty
 	return comm
 }
 
-func (c *controller) instantiateChallengeCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateChallengeCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.ChallengeCmd(
@@ -190,7 +207,11 @@ func (c *controller) instantiateChallengeCmd(commandTermination chan interface{}
 	return comm
 }
 
-func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateAddRouteCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.AddRouteCmd(
@@ -204,7 +225,11 @@ func (c *controller) instantiateAddRouteCmd(commandTermination chan interface{})
 	return comm
 }
 
-func (c *controller) instantiateClimbRouteCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateClimbRouteCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.ClimbRouteCmd(
@@ -218,7 +243,11 @@ func (c *controller) instantiateClimbRouteCmd(commandTermination chan interface{
 	return comm
 }
 
-func (c *controller) instantiateFindRouteCmd(commandTermination chan interface{}) types.Comm {
+func (c *controller) instantiateFindRouteCmd(
+	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
+) types.Comm {
 	comm := types.InitComm()
 
 	go commands.FindRouteCmd(
@@ -234,6 +263,8 @@ func (c *controller) instantiateFindRouteCmd(commandTermination chan interface{}
 
 func (c *controller) instantiateFollowCmd(
 	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -250,6 +281,8 @@ func (c *controller) instantiateFollowCmd(
 
 func (c *controller) instantiateUnfollowCmd(
 	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 
@@ -266,6 +299,8 @@ func (c *controller) instantiateUnfollowCmd(
 
 func (c *controller) instantiateProfileCmd(
 	commandTermination chan interface{},
+	userdata types.UserData,
+	currentUsers *map[string]types.UserData,
 ) types.Comm {
 	comm := types.InitComm()
 

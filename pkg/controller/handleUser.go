@@ -46,7 +46,7 @@ func handleUser(
 				// Get new command started
 				for _, cmd := range ctrl.AvailableCommands() {
 					if update.Message.Command() == cmd.Command {
-						comm := cmd.Instantiation(commandTermination)
+						comm := cmd.Instantiation(commandTermination, userdata, ctrl.GetCurrentUsers())
 						forwarder = &comm
 						forwarder.Updates <- update
 						break
