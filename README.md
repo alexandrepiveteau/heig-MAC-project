@@ -92,10 +92,10 @@ Les commandes sont définies par une `types.CommandDefinition`, qui a la structu
 
 ```go
 types.CommandDefinition{
-		Command:       "cmd",
-		Description:   "Command description.",
-		Instantiation: controller.instantiateXXX,
-	}
+	Command:       "cmd",
+	Description:   "Command description.",
+	Instantiation: controller.instantiateXXX,
+}
 ```
 
 Ces définitions sont enregistrées dans le contrôleur, et permettent aux goroutines des utilisateurs d'effectuer des commandes avec plusieurs étapes suivies de manière indépendante.
