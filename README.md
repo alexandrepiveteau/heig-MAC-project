@@ -16,6 +16,16 @@ Un bot Telegram pour tout ce qui est lié à la grimpe. Réalisé dans le cadre 
 | Alexandre Piveteau                     | alexandre.piveteau@heig-vd.ch    |
 | Guy-Laurent Subri                      | guy-laurent.subri@heig-vd.ch     |
 
+## Structure
+
+1. [Mise en place du projet](#mise-en-place-du-projet)
+2. [Structure du Bot](#structure-du-bot)
+3. [Guide utilisateur](#guide-utilisateur)
+4. [Modèle de données](#modèle-de-données)
+    - [MongoDB](#mongodb)
+    - [Neo4J](#neo4j)
+5. [Requêtes effectuées](#requêtes-effectuées)
+
 ## Mise en place du projet
 
 Pour faire tourner le bot en local, il vous faudra:
@@ -39,6 +49,8 @@ Le lancement du bot se fait de la manière suivante:
 ```
 
 Le bot restera actif jusqu'à ce qu'il reçoive un SIGTERM.
+
+## Structure du bot
 
 ## Guide utilisateur
 
