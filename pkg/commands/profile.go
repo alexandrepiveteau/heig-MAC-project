@@ -51,21 +51,23 @@ func (s *profileState) rcvUsername(update tgbotapi.Update) bool {
 
 	user, prs := s.currentUsers[data]
 	if !prs {
+		msg := tgbotapi.NewMessage(
+			utils.GetChatId(&update),
+			fmt.Sprintf("@%s never contacted me. Send him this link to get him started: t.me/climbot", data),
+		)
+		s.bot.Send(msg)
 		return false
 	}
 	s.username = &data
 
-	count, err := user.GetFollowingCount(s.neo4jDriver)
+	followers, following, err := user.GetProfile(s.neo4jDriver)
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	log.Println(count)
-
-	// TODO : Check whether this user exists in the database before moving to the next state.
 	msg := tgbotapi.NewMessage(
 		utils.GetChatId(&update),
-		fmt.Sprintf("@%s never contacted me. Send him this link to get him started: t.me/climbot", data),
+		fmt.Sprintf("@%s has %d followers and is following %d other people.", data, followers, following),
 	)
 	s.bot.Send(msg)
 
@@ -96,7 +98,6 @@ func ProfileCmd(
 	for {
 		select {
 		case <-comm.StopCommand:
-			// TODO : Actually follow the user.
 			return
 		case update := <-comm.Updates:
 			switch state.stage {
