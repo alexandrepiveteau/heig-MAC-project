@@ -52,6 +52,60 @@ Le bot restera actif jusqu'à ce qu'il reçoive un SIGTERM.
 
 ## Structure du bot
 
+Notre projet est écrit en Golang, ce qui nous permet de profiter de bibliothèques officielles pour accéder à [MongoDB](go.mongodb.org/mongo-driver) et [Neo4J](https://github.com/neo4j/neo4j-go-driver). Nous utilisons aussi une [bibliothèque pour accéder à l'API Telegram](github.com/go-telegram-bot-api/telegram-bot-api).
+
+La structure du code est la suivante (des fichiers liés à Docker et à la documentation ont été masqués par soucis de brièveté) :
+
+```
+.
+├── README.md
+├── go.mod
+├── go.sum
+└── pkg
+    ├── commands
+    │   ├── ***.go
+    │   └── keyboards
+    │       └── ***.go
+    ├── controller
+    │   ├── controller.go
+    │   └── handleUser.go
+    ├── main.go
+    ├── types
+    │   ├── attempt.go
+    │   ├── comm.go
+    │   ├── command_definition.go
+    │   ├── gym.go
+    │   ├── route.go
+    │   └── userData.go
+    └── utils
+        └── utils.go
+```
+
+Le paquet `types` contient les différents types de données stockés et lus depuis MongoDB et Neo4J. C'est là que les différentes requêtes se trouvent, ainsi que les scripts de création des différents types d'entités.
+
+
+### Distribution des commandes
+
+Quand le serveur lancé, il commence à boucler sur les _updates_ émises par l'API de bot Telegram. Nous utilisons notre `controller.Controller` pour gérer une _goroutine_ pour chaque utilisateur qui communique avec le bot. Ensuite, chacune de ces _goroutines_ se verra attribué les messages propres à un utilisateur Telegram.
+
+Les commandes sont définies par une `types.CommandDefinition`, qui a la structure suivante :
+
+```go
+types.CommandDefinition{
+	Command:       "cmd",
+	Description:   "Command description.",
+	Instantiation: controller.instantiateXXX,
+}
+```
+
+Ces définitions sont enregistrées dans le contrôleur, et permettent aux goroutines des utilisateurs d'effectuer des commandes avec plusieurs étapes suivies de manière indépendante.
+
+### Structure d'une commande
+
+Chaque commande est définie dans le paquet `commands`. Les commandes fonctionnent comme des machines d'état, qui bouclent sur les `tgbotapi.Update` émises et, en fonction de l'état actuel (le `stage`) de la commande, décident de "progresser" à l'étape suivante ou non. Les commandes peuvent émettre un signal de terminaison quand elles ont fini de s'exécuter. Les commandes s'exécutent dans des nouvelles _goroutines_, et peuvent être arrêtées par le contrôleur quand une nouvelle commande est émise par un utilisateur.
+
+Certaines commandes ou interactions utilisent des _inline keyboards_ Telegram. Ceux-ci sont définis dans le paquet `keyboards`, et peuvent être créés à partir d'une slice de `[]Choice` via la fonction `keyboards.NewInlineKeyboard`.
+
 ## Guide utilisateur
 
 Notre bot permet à des utilisateurs de rentrer des voies dans différentes salles, de leur attribuer des attributs, d'enregistrer des tentatives. Il y a aussi une composante sociale : les utilisateurs peuvent se suivre les uns avec les autres.
