@@ -256,7 +256,7 @@ Récupère la liste des utilisateurs qui sont suivis par ceux que l'utilisateur 
 Récupère le nombre d'utilisateur qui follow directement l'utilisateur courant. Une commande équivalente existe pour récupérer le nombre d'utilisateurs que l'utilisateur courant follow.
 + `/profile` (get favourite gym): `COMMAND`
 
-## Exemple de graph Neo4J
+### Exemple de graphe Neo4J
 
 Voici un extrait de l'UI Neo4J après quelques commandes de la part de 3 utilisateurs.
 
