@@ -6,6 +6,7 @@
 
 Un bot Telegram pour tout ce qui est lié à la grimpe. Réalisé dans le cadre du mini-projet du cours MAC à la HEIG-VD.
 
+:pushpin: Slides [en PDF](SLIDES.pdf) :pushpin:
 :pushpin: Modèle [sur Miro](https://miro.com/app/board/o9J_lZlt3Rw=/) :pushpin:
 
 ## Équipe
