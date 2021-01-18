@@ -76,4 +76,16 @@ Bot             : Thanks! We've added this route.
 
 ## Modèle de données
 
+## MongoDB
+
+MongoDB nous sert à stocker certaines méta-données liées aux routes et aux salles (dénommées `gym` dans notre code). Nous avons mis en place les collections suivantes :
+
++ `gym`, qui contient les méta-données suivantes des salles:
+    - `name`, le nom de la salle.
++ `routes`, qui contient les méta-données suivantes des routes:
+    - `gym`, le nom de la salle dans laquelle se situe la route.
+    - `name`, le nom de voie. Il est unique au sein d'une même salle.
+    - `grade`, la difficulté de la voie. Elle est attribuée quand la voie est créée.
+    - `holds`, la couleur des prises de cette voie.
+
 ## Requêtes effectuées
