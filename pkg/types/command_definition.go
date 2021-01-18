@@ -1,7 +1,7 @@
 package types
 
 // CmdInstantiation a type representing a way to start a bot command
-type CmdInstantiation func(chan interface{}, UserData, *map[string]UserData) Comm
+type CmdInstantiation func(chan interface{}, UserData, map[string]UserData) Comm
 
 // A CommandDefinition is used to share available commands, how we can call
 // them and what they are used for
