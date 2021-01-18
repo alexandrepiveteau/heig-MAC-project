@@ -84,7 +84,7 @@ func (a *Attempt) createInMongo(
 	}
 
 	// Add route
-	id, err := routeCollection(db).InsertOne(
+	id, err := attemptCollection(db).InsertOne(
 		context.TODO(),
 		bson.D{
 			{Key: "gym", Value: gymId},
