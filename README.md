@@ -88,4 +88,17 @@ MongoDB nous sert à stocker certaines méta-données liées aux routes et aux s
     - `grade`, la difficulté de la voie. Elle est attribuée quand la voie est créée.
     - `holds`, la couleur des prises de cette voie.
 
+## Neo4J
+
+Neo4J nous permet de stocker les relations entre les gyms, les voies, les utilisateurs et leurs tentatives. Nous avons mis en place les noeuds suivants :
+
++ `Gym`, qui contient les attributs suivants:
+    - `gymId`, l'identifiant MongoDB de la salle; et
+    - `name`, le nom de la salle.
++ `Route`, qui contient les attributs suivants:
+    - `id`, l'identifiant MongoDB de la voie;
+    - `name`, le nom de la voie;
+    - `grade`, la difficulté de la voie; et
+    - `holds`, la couleur des prises de cette voie.
+
 ## Requêtes effectuées
