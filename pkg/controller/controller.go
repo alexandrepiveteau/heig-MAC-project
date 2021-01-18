@@ -21,6 +21,9 @@ type controller struct {
 	neo4jDriver neo4j.Driver
 	mongodb     *mongo.Database
 
+	// contacted users
+	users map[string]types.UserData
+
 	availableCommands []types.CommandDefinition
 }
 
@@ -36,6 +39,8 @@ func GetController(
 		bot:         bot,
 		neo4jDriver: neo4jDriver,
 		mongodb:     mongoClient.Database("db"),
+
+		users: make(map[string]types.UserData),
 	}
 
 	// Define allowed commands
