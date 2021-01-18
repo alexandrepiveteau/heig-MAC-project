@@ -54,12 +54,6 @@ func GetController(
 		Instantiation: controller.instantiateStartCmd,
 	}
 
-	colorCmd := types.CommandDefinition{
-		Command:       "color",
-		Description:   "The color command will ask for your favourite color.",
-		Instantiation: controller.instantiateColorCmd,
-	}
-
 	challengeCmd := types.CommandDefinition{
 		Command:       "challenge",
 		Description:   "The challenge command will allow you to challenge a user you follow to climb a route",
@@ -106,7 +100,6 @@ func GetController(
 	controller.availableCommands = append(
 		controller.availableCommands,
 		startCmd,
-		colorCmd,
 		challengeCmd,
 		addRouteCmd,
 		climbRouteCmd,
@@ -173,18 +166,6 @@ func (c *controller) instantiateStartCmd(
 	comm := types.InitComm()
 
 	go commands.StartCmd(comm, commandTermination, c.bot, c.availableCommands)
-
-	return comm
-}
-
-func (c *controller) instantiateColorCmd(
-	commandTermination chan interface{},
-	userdata types.UserData,
-	currentUsers map[string]types.UserData,
-) types.Comm {
-	comm := types.InitComm()
-
-	go commands.ColorCmd(comm, commandTermination, c.bot)
 
 	return comm
 }
