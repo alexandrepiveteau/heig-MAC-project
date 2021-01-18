@@ -102,7 +102,7 @@ Ces définitions sont enregistrées dans le contrôleur, et permettent aux gorou
 
 ### Structure d'une commande
 
-Chaque commande est définie dans le paquet `commands`. Les commandes fonctionnent comme des machines d'état, qui bouclent sur les `tgbotapi.Update` émises et, en fonction de l'état actuel (le `stage`) de la commande, décident de "progresser" à l'étape suivante ou non. Les commandes peuvent émettre un signal de terminaison quand elles ont fini de s'exécuter.
+Chaque commande est définie dans le paquet `commands`. Les commandes fonctionnent comme des machines d'état, qui bouclent sur les `tgbotapi.Update` émises et, en fonction de l'état actuel (le `stage`) de la commande, décident de "progresser" à l'étape suivante ou non. Les commandes peuvent émettre un signal de terminaison quand elles ont fini de s'exécuter. Les commandes s'exécutent dans des nouvelles _goroutines_, et peuvent être arrêtées par le contrôleur quand une nouvelle commande est émise par un utilisateur.
 
 Certaines commandes ou interactions utilisent des _inline keyboards_ Telegram. Ceux-ci sont définis dans le paquet `keyboards`, et peuvent être créés à partir d'une slice de `[]Choice` via la fonction `keyboards.NewInlineKeyboard`.
 
