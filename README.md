@@ -21,10 +21,10 @@ Un bot Telegram pour tout ce qui est lié à la grimpe. Réalisé dans le cadre 
 1. [Mise en place du projet](#mise-en-place-du-projet)
 2. [Structure du Bot](#structure-du-bot)
 3. [Guide utilisateur](#guide-utilisateur)
-4. [Modèle de données](#modele-de-donnees)
-    - [Neo4J](#mongodb)
+4. [Modèle de données](#modèle-de-données)
+    - [MongoDB](#mongodb)
     - [Neo4J](#neo4j)
-5. [Requêtes effectuées](#requetes-effectuees)
+5. [Requêtes effectuées](#requêtes-effectuées)
 
 ## Mise en place du projet
 
