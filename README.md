@@ -123,7 +123,7 @@ Bot             : You're now following @alexandrepiveteau !
 ```
 <img src="assets/follow.png" width="50%" height="50%" alt="climbRoute" style="display: block; margin-left: auto; margin-right: auto;">
 
-+ `unfollow` permet de suivre des utilisateurs et obtenir des recommendations de nouvelles personnes à suivre.
++ `unfollow` permet de suivre des utilisateurs et obtenir des recommandations de nouvelles personnes à suivre.
 ```
 User [input]    : /unfollow
 Bot             : What is the @username you want to unfollow ?
