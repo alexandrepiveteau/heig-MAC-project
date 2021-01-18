@@ -13,6 +13,7 @@ import (
 type Controller interface {
 	Bot() *tgbotapi.BotAPI
 	MongoDB() *mongo.Database
+	Neo4j() neo4j.Driver
 
 	AvailableCommands() []types.CommandDefinition
 	GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Update
@@ -127,6 +128,10 @@ func (c *controller) MongoDB() *mongo.Database {
 	return c.mongodb
 }
 
+func (c *controller) Neo4j() neo4j.Driver {
+	return c.neo4jDriver
+}
+
 func (c *controller) AvailableCommands() []types.CommandDefinition {
 	return c.availableCommands
 }
@@ -147,7 +152,7 @@ func (c *controller) GetAssociatedChan(update tgbotapi.Update) chan tgbotapi.Upd
 		data = userdata
 
 		// launch goroutine dedicated to one user
-		go handleUser(c, userdata.Channel)
+		go handleUser(c, userdata)
 	}
 
 	return data.Channel

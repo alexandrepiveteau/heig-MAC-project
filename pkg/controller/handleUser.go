@@ -3,17 +3,24 @@ package controller
 import (
 	"climb/pkg/types"
 	"climb/pkg/utils"
-
-	tgbotapi "github.com/go-telegram-bot-api/telegram-bot-api"
+	"log"
 )
 
 func handleUser(
 	ctrl Controller,
-	updates <-chan tgbotapi.Update,
+	userdata types.UserData,
 ) {
+	// Add user in neo4j
+	err := userdata.RegisterInNeo4j(ctrl.Neo4j())
+	if err != nil {
+		log.Println(err.Error())
+	}
+
+	// Prepare needed controllers
 	var forwarder *types.Comm
 	commandTermination := make(chan interface{})
 
+	// Main goroutine loop
 	for {
 		select {
 		case <-commandTermination:
@@ -24,7 +31,7 @@ func handleUser(
 			}
 			break
 
-		case update := <-updates:
+		case update := <-userdata.Channel:
 			// we received an update message from our user
 			utils.LogReception(update)
 
