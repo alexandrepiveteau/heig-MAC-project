@@ -84,7 +84,7 @@ La structure du code est la suivante (des fichiers liés à Docker et à la docu
 Le paquet `types` contient les différents types de données stockés et lus depuis MongoDB et Neo4J. C'est là que les différentes requêtes se trouvent, ainsi que les scripts de création des différents types d'entités.
 
 
-### Distribution des commandes
+### Distribution des commandes
 
 Quand le serveur lancé, il commence à boucler sur les _updates_ émises par l'API de bot Telegram. Nous utilisons notre `controller.Controller` pour gérer une _goroutine_ pour chaque utilisateur qui communique avec le bot. Ensuite, chacune de ces _goroutines_ se verra attribué les messages propres à un utilisateur Telegram.
 
