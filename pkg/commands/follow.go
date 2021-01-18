@@ -49,7 +49,9 @@ func (s *followState) init(update tgbotapi.Update) {
 		s.usernameChoices = append(s.usernameChoices, keyboards.Choice{Action: username, Label: username})
 	}
 
-	msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+	if len(s.usernameChoices) > 0 {
+		msg.ReplyMarkup = keyboards.NewInlineKeyboard(s.usernameChoices, 1)
+	}
 
 	s.bot.Send(msg)
 	s.stage = followUsername
