@@ -249,6 +249,7 @@ Ces différents types de noeuds sont aussi liés par certaines relations :
 
 Dans chacune de commandes proposées par le bot, nous effectuons un certain nombre de requêtes afin stocker ou récupérer des données. Voici un extrait des requêtes les plus intéressantes:
 + `/follow` (get follower recommendations): `MATCH (me:User)-[:FOLLOWS]->()-[:FOLLOWS]->(following:User) WHERE me.name = $username AND NOT exists( (me)-[:FOLLOWS]->(following)) RETURN following`\
-Récupère la liste des utilisateurs qui sont suivis par ceux que l'utulisateur suit, s'ils ne font pas déjà partie des utilisateurs suivis directement
-
+Récupère la liste des utilisateurs qui sont suivis par ceux que l'utilisateur courant suit, s'ils ne font pas déjà partie des utilisateurs suivis directement
++ `/profile` (get follower count): `MATCH (me:User)<-[f:FOLLOWS]-(followers) WHERE me.name = $username WITH me, count(f) as cFollowers return cFollowers`:\
+Récupère le nombre d'utilisateur qui follow directement l'utilisateur courant. Une commande équivalente existe pour récupérer le nombre d'utilisateurs que l'utilisateur courant follow.
 + `/profile` (get favourite gym): `COMMAND`
